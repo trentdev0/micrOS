@@ -1,0 +1,6 @@
+/limine
+/bootdisk
+/kernel/*.o
+/kernel/*.d
+/image.iso
+/kernel.elf

@@ -1,0 +1,12 @@
+{
+	"files.exclude": {
+		"**/*.o": true,
+		"**/*.d": true
+	},
+	"editor.insertSpaces": false,
+	"editor.detectIndentation": false,
+	"editor.tabSize": 4,
+	"editor.trimAutoWhitespace": true,
+	"editor.renderWhitespace": "boundary",
+	"editor.renderControlCharacters": true
+}
