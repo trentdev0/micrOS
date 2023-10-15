@@ -8,5 +8,8 @@
 	"editor.tabSize": 4,
 	"editor.trimAutoWhitespace": true,
 	"editor.renderWhitespace": "boundary",
-	"editor.renderControlCharacters": true
+	"editor.renderControlCharacters": true,
+	"files.associations": {
+		"flanterm.h": "c"
+	}
 }
