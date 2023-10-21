@@ -14,5 +14,24 @@ typedef enum
 	COM8 = 0x4E8
 } serial_port_t;
 
+int serial_init(serial_port_t serial_port);
+
 void serial_write(serial_port_t serial_port, uint8_t byte);
 uint8_t serial_read(serial_port_t serial_port);
+
+void com1_write(char character);
+char com1_read();
+void com2_write(char character);
+char com2_read();
+void com3_write(char character);
+char com3_read();
+void com4_write(char character);
+char com4_read();
+void com5_write(char character);
+char com5_read();
+void com6_write(char character);
+char com6_read();
+void com7_write(char character);
+char com7_read();
+void com8_write(char character);
+char com8_read();

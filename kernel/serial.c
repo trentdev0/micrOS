@@ -36,3 +36,20 @@ uint8_t serial_read(serial_port_t serial_port)
 	while (!(inb(serial_port + 5) & 1));
 	return inb(serial_port);
 }
+
+void com1_write(char character) { serial_write(COM1, character); }
+char com1_read() { return serial_read(COM1); }
+void com2_write(char character) { serial_write(COM2, character); }
+char com2_read() { return serial_read(COM2); }
+void com3_write(char character) { serial_write(COM3, character); }
+char com3_read() { return serial_read(COM3); }
+void com4_write(char character) { serial_write(COM4, character); }
+char com4_read() { return serial_read(COM4); }
+void com5_write(char character) { serial_write(COM5, character); }
+char com5_read() { return serial_read(COM5); }
+void com6_write(char character) { serial_write(COM6, character); }
+char com6_read() { return serial_read(COM6); }
+void com7_write(char character) { serial_write(COM7, character); }
+char com7_read() { return serial_read(COM7); }
+void com8_write(char character) { serial_write(COM8, character); }
+char com8_read() { return serial_read(COM8); }

@@ -10,6 +10,8 @@
 	"editor.renderWhitespace": "boundary",
 	"editor.renderControlCharacters": true,
 	"files.associations": {
-		"flanterm.h": "c"
+		"flanterm.h": "c",
+		"serial.h": "c",
+		"stream.h": "c"
 	}
 }
