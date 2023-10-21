@@ -12,6 +12,7 @@
 	"files.associations": {
 		"flanterm.h": "c",
 		"serial.h": "c",
-		"stream.h": "c"
+		"stream.h": "c",
+		"stdint.h": "c"
 	}
 }

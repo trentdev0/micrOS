@@ -44,7 +44,6 @@ int stream_printf(stream_t * stream, const char * format, ...)
 
 	char character;
 	const char * string;
-	unsigned int num;
 	
 	while(*format != '\0')
 	{
