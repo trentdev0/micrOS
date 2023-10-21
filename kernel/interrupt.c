@@ -33,8 +33,49 @@ void interrupt_flush()
 void interrupt0(frame_t * frame)
 {
 	(void)frame;
-	stream_printf(current_stream, "Exception triggered!\r\nKernel attempted to divide by zero!\r\n");
+	stream_printf(current_stream, "Exception triggered!\r\nDivision error occured in kernel!\r\n");
 
 	hang();
 }
+
+void interrupt2(frame_t * frame)
+{
+	(void)frame;
+	stream_printf(current_stream, "Exception triggered!\r\nNMI (Non Maskable Interrupt) occured!\r\n");
+
+	hang();
+}
+
+void interrupt4(frame_t * frame)
+{
+	(void)frame;
+	stream_printf(current_stream, "Exception triggered!\r\nOverflow occured in kernel!\r\n");
+
+	hang();
+}
+
+void interrupt5(frame_t * frame)
+{
+	(void)frame;
+	stream_printf(current_stream, "Exception triggered!\r\nUnauthorized access in memory!\r\n");
+
+	hang();
+}
+
+void interrupt6(frame_t * frame)
+{
+	(void)frame;
+	stream_printf(current_stream, "Exception triggered!\r\nInvalid opcode!\r\n");
+
+	hang();
+}
+
+void interrupt7(frame_t * frame)
+{
+	(void)frame;
+	stream_printf(current_stream, "Exception triggered!\r\nFPU (Floating-Point Unit) fault!\r\n");
+
+	hang();
+}
+
 #endif

@@ -57,4 +57,9 @@ static inline void interrupt_wipe()
 }
 
 void interrupt0(frame_t * frame) __attribute__((interrupt));
+void interrupt2(frame_t * frame) __attribute__((interrupt));
+void interrupt4(frame_t * frame) __attribute__((interrupt));
+void interrupt5(frame_t * frame) __attribute__((interrupt));
+void interrupt6(frame_t * frame) __attribute__((interrupt));
+void interrupt7(frame_t * frame) __attribute__((interrupt));
 #endif
