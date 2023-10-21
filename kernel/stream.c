@@ -2,6 +2,7 @@
 
 #include "stream.h"
 #include "serial.h"
+#include "string.h"
 
 stream_t streams[8];
 stream_t * current_stream;
