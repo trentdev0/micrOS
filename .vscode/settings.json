@@ -22,6 +22,7 @@
 		"string.h": "c",
 		"pic.h": "c",
 		"interrupt.h": "c",
-		"cpu.h": "c"
+		"cpu.h": "c",
+		"limits.h": "c"
 	}
 }
