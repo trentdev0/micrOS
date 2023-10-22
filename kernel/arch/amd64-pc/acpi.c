@@ -93,6 +93,11 @@ int acpi_init()
 				stream_printf(current_stream, "[ACPI] Detected an LAPIC!\r\n");
 			}
 			break;
+		case 1: {
+				ioapic_t * lapic = (ioapic_t *)header;
+				stream_printf(current_stream, "[ACPI] Detected an IOAPIC!\r\n");
+			}
+			break;
 		}
 
 		offset += header->length;

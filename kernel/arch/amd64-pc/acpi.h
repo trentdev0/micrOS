@@ -58,6 +58,16 @@ typedef struct
 	uint32_t flags;
 } __attribute__((packed)) lapic_t;
 
+typedef struct
+{
+	uint8_t id;
+	uint8_t length;
+	uint8_t unknown0;
+	uint8_t reserved;
+	uint32_t address;
+	uint32_t unknown1;
+} __attribute__((packed)) ioapic_t;
+
 extern rsdp_t * rsdp;
 extern rsdt_t * rsdt;
 
