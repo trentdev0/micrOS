@@ -1,9 +1,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "arch/amd64/cpu.h"
-#include "arch/amd64/descriptor.h"
-#include "arch/amd64/pic.h"
+#include "arch/amd64-pc/cpu.h"
+#include "arch/amd64-pc/descriptor.h"
 #include "interrupt.h"
 #include "stream.h"
 
@@ -86,10 +85,6 @@ void interrupt32(frame_t * frame)
 {
 	(void)frame;
 
-	ticks++;
-
 	stream_printf(current_stream, "PIT interrupt triggered!\r\n");
-
-	pic_eoi(32);
 }
 #endif

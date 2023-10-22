@@ -2,8 +2,8 @@
 #include <stddef.h>
 
 #include "limine.h"
-#include "arch/amd64/cpu.h"
-#include "arch/amd64/pic.h"
+#include "arch/amd64-pc/cpu.h"
+#include "arch/amd64-pc/acpi.h"
 #include "serial.h"
 #include "stream.h"
 #include "interrupt.h"
@@ -20,6 +20,8 @@ void _start()
 	interrupt_register(5, &interrupt5, 0x8E);
 	interrupt_register(6, &interrupt6, 0x8E);
 	interrupt_register(7, &interrupt7, 0x8E);
+
+	acpi_init();
 
 	stream_printf(current_stream, "Hello, world!\r\nHere's my string: `%s`.\r\n", "Hi!");
 
