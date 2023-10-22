@@ -2,8 +2,6 @@
 
 #include <stdint.h>
 
-#define CPU_MAX 256
-
 static inline void cli()
 {
 	asm("cli");

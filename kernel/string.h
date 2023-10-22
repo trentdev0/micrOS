@@ -9,7 +9,7 @@ void *memmove(void *dest, const void *src, size_t n);
 int memcmp(const void *s1, const void *s2, size_t n);
 unsigned int strlen(const char * s);
 
-inline void convert_int8(int8_t number, char * string)
+static inline void convert_int8(int8_t number, char * string)
 {
 	if(number < 0)
 	{
@@ -222,7 +222,7 @@ static inline void convert_uint32(uint32_t number, char * string)
 	*string = '\0';
 }
 
-static inline void int64_to_str(int64_t number, char * string)
+static inline void convert_int64(int64_t number, char * string)
 {
 	if(number < 0)
 	{

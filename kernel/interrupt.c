@@ -81,6 +81,14 @@ void interrupt7(frame_t * frame)
 	hang();
 }
 
+void interrupt14(frame_t * frame)
+{
+	(void)frame;
+	stream_printf(current_stream, "Exception triggered!\r\nPage fault!\r\n");
+
+	hang();
+}
+
 void interrupt32(frame_t * frame)
 {
 	(void)frame;

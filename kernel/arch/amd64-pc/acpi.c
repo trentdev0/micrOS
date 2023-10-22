@@ -19,35 +19,7 @@ volatile struct limine_hhdm_request hhdm_request = {
 rsdp_t * rsdp;
 rsdt_t * rsdt;
 
-void acpi_init()
-{
-	struct limine_rsdp_response * rsdp_response = rsdp_request.response;
-
-	if(rsdp_response == NULL)
-	{
-		stream_printf(current_stream, "RSDP response is set to null!\r\nHanging...\r\n");
-		hang();
-	}
-
-	if(rsdp_response->address == NULL)
-	{
-		stream_printf(current_stream, "RSDP address is set to null!\r\nHanging...\r\n");
-		hang();
-	}
-
-	rsdp = rsdp_response->address;
-
-	if(xsdt_enabled())
-	{
-		rsdt = (rsdt_t *)(rsdp->xsdt_addr + hhdm_request.response->offset);
-	}
-	else
-	{
-		rsdt = (rsdt_t *)((uint64_t)rsdp->rsdt_addr + hhdm_request.response->offset);
-	}
-}
-
-void * acpi_get_sdt(const char * signature)
+sdt_t * acpi_get_sdt(const char * signature)
 {
 	size_t entry_count = (rsdt->sdt.length - sizeof(sdt_t)) / (xsdt_enabled() ? 8 : 4);
 
@@ -71,4 +43,60 @@ void * acpi_get_sdt(const char * signature)
 		return sdt;
 	}
 	return NULL;
+}
+
+int acpi_init()
+{
+	struct limine_rsdp_response * rsdp_response = rsdp_request.response;
+
+	if(rsdp_response == NULL)
+	{
+		return -1;
+	}
+
+	if(rsdp_response->address == NULL)
+	{
+		return -2;
+	}
+
+	rsdp = rsdp_response->address;
+
+	if(xsdt_enabled())
+	{
+		rsdt = (rsdt_t *)(rsdp->xsdt_addr + hhdm_request.response->offset);
+	}
+	else
+	{
+		rsdt = (rsdt_t *)((uint64_t)rsdp->rsdt_addr + hhdm_request.response->offset);
+	}
+
+	madt_t * madt = (madt_t *)acpi_get_sdt("APIC");
+	if(madt == NULL)
+	{
+		return -3;
+	}
+
+	size_t offset = 0;
+	for(;;)
+	{
+		if(madt->sdt.length - sizeof(madt_t) - offset < 2)
+		{
+			break;
+		}
+
+		header_t * header = (header_t *)(madt->entries_data + offset);
+
+		switch(header->id)
+		{
+		case 0: {
+				lapic_t * lapic = (lapic_t *)header;
+				stream_printf(current_stream, "[ACPI] Detected an LAPIC!\r\n");
+			}
+			break;
+		}
+
+		offset += header->length;
+	}
+
+	return 0;
 }

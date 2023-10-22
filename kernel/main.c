@@ -7,7 +7,6 @@
 #include "serial.h"
 #include "stream.h"
 #include "interrupt.h"
-#include "fbterm.h"
 
 void _start()
 {
@@ -21,14 +20,11 @@ void _start()
 	interrupt_register(5, &interrupt5, 0x8E);
 	interrupt_register(6, &interrupt6, 0x8E);
 	interrupt_register(7, &interrupt7, 0x8E);
+	interrupt_register(14, &interrupt14, 0x8E);
 
 	acpi_init();
 
-	stream_printf(current_stream, "Hello, world!\r\nHere's my string: `%s`.\r\n", "Hi!");
-
-	fbterm_init();
-
-	/* fbterm_drawchar((uint16_t)'h', 4, 4, rgb(255, 255, 255), rgb(0, 0, 0)); */
+	stream_printf(current_stream, "Hello, world!\r\n");
 
 	hang();
 }
