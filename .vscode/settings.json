@@ -13,6 +13,7 @@
 		"flanterm.h": "c",
 		"serial.h": "c",
 		"stream.h": "c",
-		"stdint.h": "c"
+		"stdint.h": "c",
+		"compare": "cpp"
 	}
 }

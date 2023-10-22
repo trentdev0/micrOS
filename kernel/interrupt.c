@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stddef.h>
 
 #include "arch/amd64/amd64.h"
 #include "interrupt.h"
@@ -6,7 +7,11 @@
 #include "stream.h"
 
 #if defined(__x86_64__)
+#include "memory.h"
+
 idt_t idt[256];
+
+void * apic_base = NULL;
 
 void interrupt_register(uint8_t vector, void * interrupt_handler, uint8_t flags)
 {
