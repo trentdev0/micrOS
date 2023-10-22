@@ -1,17 +1,16 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "arch/amd64/amd64.h"
+#include "arch/amd64/cpu.h"
+#include "arch/amd64/descriptor.h"
+#include "arch/amd64/pic.h"
 #include "interrupt.h"
-#include "descriptor.h"
 #include "stream.h"
 
 #if defined(__x86_64__)
 #include "memory.h"
 
 idt_t idt[256];
-
-void * apic_base = NULL;
 
 void interrupt_register(uint8_t vector, void * interrupt_handler, uint8_t flags)
 {
@@ -83,4 +82,14 @@ void interrupt7(frame_t * frame)
 	hang();
 }
 
+void interrupt32(frame_t * frame)
+{
+	(void)frame;
+
+	ticks++;
+
+	stream_printf(current_stream, "PIT interrupt triggered!\r\n");
+
+	pic_eoi(32);
+}
 #endif

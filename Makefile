@@ -11,6 +11,16 @@ OBJ_C_FILES := $(patsubst $(SRC_DIR)/%.c, $(SRC_DIR)/%.o, $(SRC_C_FILES))
 OBJ_S_FILES := $(patsubst $(SRC_DIR)/%.S, $(SRC_DIR)/%.o, $(SRC_S_FILES))
 OBJ_FILES := $(OBJ_C_FILES) $(OBJ_S_FILES)
 
+ARCH ?= amd64
+
+ifeq ($(ARCH), amd64)
+	ARCH_C_FILES := $(wildcard $(SRC_DIR)/arch/amd64/*.c)
+	ARCH_S_FILES := $(wildcard $(SRC_DIR)/arch/amd64/*.S)
+	ARCH_OBJ_C_FILES := $(patsubst $(SRC_DIR)/arch/amd64/%.c, $(SRC_DIR)/arch/amd64/%.o, $(ARCH_C_FILES))
+	ARCH_OBJ_S_FILES := $(patsubst $(SRC_DIR)/arch/amd64/%.S, $(SRC_DIR)/arch/amd64/%.o, $(ARCH_S_FILES))
+	OBJ_FILES += $(ARCH_OBJ_C_FILES) $(ARCH_OBJ_S_FILES)
+endif
+
 .PHONY: all clean limine cdrom run run-serial
 
 all: kernel.elf cdrom
@@ -29,6 +39,14 @@ $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.S
 	$(AS) $< -o $@
+
+ifeq ($(ARCH), amd64)
+	$(SRC_DIR)/arch/amd64/%.o: $(SRC_DIR)/arch/amd64/%.c
+		$(CC) $(CFLAGS) -c $< -o $@
+
+	$(SRC_DIR)/arch/amd64/%.o: $(SRC_DIR)/arch/amd64/%.S
+		$(AS) $< -o $@
+endif
 
 limine:
 	git clone https://github.com/limine-bootloader/limine.git --branch=v4.x-branch-binary --depth=1

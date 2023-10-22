@@ -7,6 +7,7 @@ void *memcpy(void *dest, const void *src, size_t n);
 void *memset(void *s, int c, size_t n);
 void *memmove(void *dest, const void *src, size_t n);
 int memcmp(const void *s1, const void *s2, size_t n);
+unsigned int strlen(const char * s);
 
 inline void convert_int8(int8_t number, char * string)
 {

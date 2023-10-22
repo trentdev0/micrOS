@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#include "arch/amd64/amd64.h"
+#include "arch/amd64/cpu.h"
 #include "serial.h"
 
 int serial_init(serial_port_t serial_port)

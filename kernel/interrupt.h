@@ -5,8 +5,6 @@
 #include "string.h"
 
 #if defined(__x86_64__)
-extern void * apic_base;
-
 typedef struct
 {
 	uint16_t offset_low;
@@ -64,34 +62,5 @@ void interrupt4(frame_t * frame) __attribute__((interrupt));
 void interrupt5(frame_t * frame) __attribute__((interrupt));
 void interrupt6(frame_t * frame) __attribute__((interrupt));
 void interrupt7(frame_t * frame) __attribute__((interrupt));
-
-#define APIC_ID 0x20
-#define APIC_VERSION 0x30
-#define APIC_SPURIOUS_INT 0xF0
-#define APIC_EOI 0xB0
-#define APIC_ICR_LOW 0x300
-#define APIC_ICR_HIGH 0x310
-
-#define APIC_SPURIOUS_VECTOR_NUM 0xFF
-#define APIC_FLAG_ENABLE (1 << 8)
-
-static inline uint32_t apic_read(uint16_t offset)
-{
-    return *(volatile uint32_t*)(apic_base + offset);
-}
-
-static inline void apic_write(uint16_t offset, uint32_t value)
-{
-    *(volatile uint32_t*)(apic_base + offset) = value;
-}
-
-static inline void apic_eoi()
-{
-	apic_write(APIC_EOI, 1);
-}
-
-static inline void apic_init()
-{
-	apic_write(APIC_SPURIOUS_INT, APIC_FLAG_ENABLE | APIC_SPURIOUS_VECTOR_NUM);
-}
+void interrupt32(frame_t * frame) __attribute__((interrupt));
 #endif

@@ -14,6 +14,14 @@
 		"serial.h": "c",
 		"stream.h": "c",
 		"stdint.h": "c",
-		"compare": "cpp"
+		"compare": "cpp",
+		"acpi.h": "c",
+		"limine.h": "c",
+		"string_view": "c",
+		"madt.h": "c",
+		"string.h": "c",
+		"pic.h": "c",
+		"interrupt.h": "c",
+		"cpu.h": "c"
 	}
 }
