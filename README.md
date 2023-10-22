@@ -1,6 +1,5 @@
 <div style="display: flex; align-items: center;">
 	<img src="docs/logo.png" alt="M/UX's logo!" width="100" height="100" style="margin-right: 20px;">
-	<h1>M/UX</h1>
 </div>
 
 # M/UX
