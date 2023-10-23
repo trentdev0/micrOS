@@ -9,286 +9,169 @@ void *memmove(void *dest, const void *src, size_t n);
 int memcmp(const void *s1, const void *s2, size_t n);
 unsigned int strlen(const char * s);
 
-static inline void convert_int8(int8_t number, char * string)
+static inline void convert_hecks(unsigned long num, char *buffer, int buffer_size)
 {
-	if(number < 0)
-	{
-		*string = '-';
-		string++;
-		number = -number;
-	}
+	int i = 0;
 
-	int8_t temp = number;
-	int8_t rev = 0;
-	int8_t count = 0;
-
-	while(temp != 0)
+	do
 	{
-		rev = rev * 10 + temp % 10;
-		temp /= 10;
-		count++;
-	}
-
-	if(count == 0)
-	{
-		*string = '0';
-		string++;
-	}
-	else
-	{
-		while(count > 0)
+		unsigned long remainder = num % 16;
+		if(remainder < 10)
 		{
-			*string = '0' + rev % 10;
-			rev /= 10;
-			string++;
-			count--;
+			buffer[i++] = '0' + remainder;
 		}
-	}
+		else
+		{
+			buffer[i++] = 'A' + (remainder - 10);
+		}
+		num /= 16;
+	} while(num > 0 && i < buffer_size - 1);
 
-	*string = '\0';
+	buffer[i] = '\0';
+
+	int len = i;
+	for(int j = 0; j < len / 2; j++)
+	{
+		char temp = buffer[j];
+		buffer[j] = buffer[len - j - 1];
+		buffer[len - j - 1] = temp;
+	}
 }
 
-static inline void convert_uint8(uint8_t number, char * string)
+
+static inline void convert_long(long num, char * buffer, int buffer_size)
 {
-	uint8_t temp = number;
-	uint8_t rev = 0;
-	uint8_t count = 0;
+	int i = 0;
+	int is_negative = 0;
 
-	while(temp != 0)
+	if(num < 0)
 	{
-		rev = rev * 10 + temp % 10;
-		temp /= 10;
-		count++;
+		is_negative = 1;
+		num = -num;
 	}
 
-	if(count == 0)
+	do
 	{
-		*string = '0';
-		string++;
-	}
-	else
+		buffer[i++] = num % 10 + '0';
+		num /= 10;
+	} while (num > 0 && i < buffer_size - 1);
+
+	if(is_negative && i < buffer_size - 1)
 	{
-		while(count > 0)
-		{
-			*string = '0' + rev % 10;
-			rev /= 10;
-			string++;
-			count--;
-		}
+		buffer[i++] = '-';
 	}
 
-	*string = '\0';
+	buffer[i] = '\0';
+
+	int len = i;
+	for(int j = 0; j < len / 2; j++)
+	{
+		char temp = buffer[j];
+		buffer[j] = buffer[len - j - 1];
+		buffer[len - j - 1] = temp;
+	}
 }
 
-static inline void convert_int16(int16_t number, char * string)
+static inline void convert_ulong(unsigned long num, char * buffer, int buffer_size)
 {
-	if(number < 0)
-	{
-		*string = '-';
-		string++;
-		number = -number;
-	}
+	int i = 0;
 
-	int16_t temp = number;
-	int16_t rev = 0;
-	int16_t count = 0;
-
-	while(temp != 0)
+	do
 	{
-		rev = rev * 10 + temp % 10;
-		temp /= 10;
-		count++;
-	}
+		buffer[i++] = num % 10 + '0';
+		num /= 10;
+	} while (num > 0 && i < buffer_size - 1);
 
-	if(count == 0)
-	{
-		*string = '0';
-		string++;
-	}
-	else
-	{
-		while(count > 0)
-		{
-			*string = '0' + rev % 10;
-			rev /= 10;
-			string++;
-			count--;
-		}
-	}
+	buffer[i] = '\0';
 
-	*string = '\0';
+	int len = i;
+	for(int j = 0; j < len / 2; j++)
+	{
+		char temp = buffer[j];
+		buffer[j] = buffer[len - j - 1];
+		buffer[len - j - 1] = temp;
+	}
 }
 
-static inline void convert_uint16(uint16_t number, char * string)
+static inline void convert_hex(unsigned int num, char * buffer, int buffer_size)
 {
-	uint16_t temp = number;
-	uint16_t rev = 0;
-	uint16_t count = 0;
+	int i = 0;
 
-	while(temp != 0)
+	do
 	{
-		rev = rev * 10 + temp % 10;
-		temp /= 10;
-		count++;
-	}
-
-	if(count == 0)
-	{
-		*string = '0';
-		string++;
-	}
-	else
-	{
-		while(count > 0)
+		int remainder = num % 16;
+		if(remainder < 10)
 		{
-			*string = '0' + rev % 10;
-			rev /= 10;
-			string++;
-			count--;
+			buffer[i++] = '0' + remainder;
 		}
-	}
+		else
+		{
+			buffer[i++] = 'A' + (remainder - 10);
+		}
+		num /= 16;
+	} while(num > 0 && i < buffer_size - 1);
 
-	*string = '\0';
+	buffer[i] = '\0';
+
+	int len = i;
+	for(int j = 0; j < len / 2; j++)
+	{
+		char temp = buffer[j];
+		buffer[j] = buffer[len - j - 1];
+		buffer[len - j - 1] = temp;
+	}
 }
 
-static inline void convert_int32(int32_t number, char * string)
+static inline void convert_int(int num, char * buffer, int buffer_size)
 {
-	if(number < 0)
+	int i = 0;
+	int is_negative = 0;
+
+	if(num < 0)
 	{
-		*string = '-';
-		string++;
-		number = -number;
+		is_negative = 1;
+		num = -num;
 	}
 
-	int32_t temp = number;
-	int32_t rev = 0;
-	int32_t count = 0;
-
-	while(temp != 0)
+	do
 	{
-		rev = rev * 10 + temp % 10;
-		temp /= 10;
-		count++;
+		buffer[i++] = num % 10 + '0';
+		num /= 10;
+	} while (num > 0 && i < buffer_size - 1);
+
+	if(is_negative && i < buffer_size - 1)
+	{
+		buffer[i++] = '-';
 	}
 
-	if(count == 0)
-	{
-		*string = '0';
-		string++;
-	}
-	else
-	{
-		while(count > 0)
-		{
-			*string = '0' + rev % 10;
-			rev /= 10;
-			string++;
-			count--;
-		}
-	}
+	buffer[i] = '\0';
 
-	*string = '\0';
+	int len = i;
+	for(int j = 0; j < len / 2; j++)
+	{
+		char temp = buffer[j];
+		buffer[j] = buffer[len - j - 1];
+		buffer[len - j - 1] = temp;
+	}
 }
 
-static inline void convert_uint32(uint32_t number, char * string)
+static inline void convert_uint(unsigned int num, char * buffer, int buffer_size)
 {
-	uint32_t temp = number;
-	uint32_t rev = 0;
-	uint32_t count = 0;
+	int i = 0;
 
-	while(temp != 0)
+	do
 	{
-		rev = rev * 10 + temp % 10;
-		temp /= 10;
-		count++;
-	}
+		buffer[i++] = num % 10 + '0';
+		num /= 10;
+	} while(num > 0 && i < buffer_size - 1);
 
-	if(count == 0)
+	buffer[i] = '\0';
+
+	int len = i;
+	for(int j = 0; j < len / 2; j++)
 	{
-		*string = '0';
-		string++;
+		char temp = buffer[j];
+		buffer[j] = buffer[len - j - 1];
+		buffer[len - j - 1] = temp;
 	}
-	else
-	{
-		while(count > 0)
-		{
-			*string = '0' + rev % 10;
-			rev /= 10;
-			string++;
-			count--;
-		}
-	}
-
-	*string = '\0';
-}
-
-static inline void convert_int64(int64_t number, char * string)
-{
-	if(number < 0)
-	{
-		*string = '-';
-		string++;
-		number = -number;
-	}
-
-	int64_t temp = number;
-	int64_t rev = 0;
-	int64_t count = 0;
-
-	while(temp != 0)
-	{
-		rev = rev * 10 + temp % 10;
-		temp /= 10;
-		count++;
-	}
-
-	if(count == 0)
-	{
-		*string = '0';
-		string++;
-	}
-	else
-	{
-		while(count > 0)
-		{
-			*string = '0' + rev % 10;
-			rev /= 10;
-			string++;
-			count--;
-		}
-	}
-
-	*string = '\0';
-}
-
-static inline void convert_uint64(uint64_t number, char * string)
-{
-	uint64_t temp = number;
-	uint64_t rev = 0;
-	uint64_t count = 0;
-
-	while(temp != 0)
-	{
-		rev = rev * 10 + temp % 10;
-		temp /= 10;
-		count++;
-	}
-
-	if(count == 0)
-	{
-		*string = '0';
-		string++;
-	}
-	else
-	{
-		while(count > 0)
-		{
-			*string = '0' + rev % 10;
-			rev /= 10;
-			string++;
-			count--;
-		}
-	}
-
-	*string = '\0';
 }
