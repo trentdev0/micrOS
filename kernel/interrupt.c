@@ -36,7 +36,7 @@ void interrupt_flush()
 void interrupt0(frame_t * frame)
 {
 	(void)frame;
-	stream_printf(current_stream, "Exception triggered!\r\nDivision error occured in kernel!\r\n");
+	stream_printf(current_stream, "[EXCEPTION]:\033[15GDivision error occured!\r\n");
 
 	hang();
 }
@@ -44,7 +44,7 @@ void interrupt0(frame_t * frame)
 void interrupt2(frame_t * frame)
 {
 	(void)frame;
-	stream_printf(current_stream, "Exception triggered!\r\nNMI (Non Maskable Interrupt) occured!\r\n");
+	stream_printf(current_stream, "[EXCEPTION]:\033[15GNMI (Non Maskable Interrupt) occured!\r\n");
 
 	hang();
 }
@@ -52,7 +52,7 @@ void interrupt2(frame_t * frame)
 void interrupt4(frame_t * frame)
 {
 	(void)frame;
-	stream_printf(current_stream, "Exception triggered!\r\nOverflow occured in kernel!\r\n");
+	stream_printf(current_stream, "[EXCEPTION]:\033[15GOverflow occured!\r\n");
 
 	hang();
 }
@@ -60,7 +60,7 @@ void interrupt4(frame_t * frame)
 void interrupt5(frame_t * frame)
 {
 	(void)frame;
-	stream_printf(current_stream, "Exception triggered!\r\nUnauthorized access in memory!\r\n");
+	stream_printf(current_stream, "[EXCEPTION]:\033[15GUnauthorized access in memory!\r\n");
 
 	hang();
 }
@@ -68,7 +68,7 @@ void interrupt5(frame_t * frame)
 void interrupt6(frame_t * frame)
 {
 	(void)frame;
-	stream_printf(current_stream, "Exception triggered!\r\nInvalid opcode!\r\n");
+	stream_printf(current_stream, "[EXCEPTION]:\033[15GInvalid opcode!\r\n");
 
 	hang();
 }
@@ -76,7 +76,7 @@ void interrupt6(frame_t * frame)
 void interrupt7(frame_t * frame)
 {
 	(void)frame;
-	stream_printf(current_stream, "Exception triggered!\r\nFPU (Floating-Point Unit) fault!\r\n");
+	stream_printf(current_stream, "[EXCEPTION]:\033[15GFPU (Floating-Point Unit) fault!\r\n");
 
 	hang();
 }
@@ -84,7 +84,7 @@ void interrupt7(frame_t * frame)
 void interrupt14(frame_t * frame)
 {
 	(void)frame;
-	stream_printf(current_stream, "Exception triggered!\r\nPage fault!\r\n");
+	stream_printf(current_stream, "[EXCEPTION]:\033[15GPage fault!\r\n");
 
 	hang();
 }
@@ -93,6 +93,6 @@ void interrupt32(frame_t * frame)
 {
 	(void)frame;
 
-	stream_printf(current_stream, "PIT interrupt triggered!\r\n");
+	stream_printf(current_stream, "[INTERRUPT]:\033[15GPIT interrupt triggered!\r\n");
 }
 #endif

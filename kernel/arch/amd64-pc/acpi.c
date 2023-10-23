@@ -90,14 +90,19 @@ int acpi_init()
 		{
 		case 0: {
 				lapic_t * lapic = (lapic_t *)header;
-				stream_printf(current_stream, "[ACPI] Detected an LAPIC!\r\n");
+				(void)lapic;
+				stream_printf(current_stream, "[ACPI]:\033[15GDetected an LAPIC!\r\n");
 			}
 			break;
 		case 1: {
-				ioapic_t * lapic = (ioapic_t *)header;
-				stream_printf(current_stream, "[ACPI] Detected an IOAPIC!\r\n");
+				ioapic_t * ioapic = (ioapic_t *)header;
+				(void)ioapic;
+				stream_printf(current_stream, "[ACPI]:\033[15GDetected an IOAPIC!\r\n");
 			}
 			break;
+		default: {
+				stream_printf(current_stream, "[ACPI]:\033[15GDetected an unknown device, got type %d.\r\n", header->id);
+			}
 		}
 
 		offset += header->length;
