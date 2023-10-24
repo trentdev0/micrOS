@@ -7,10 +7,13 @@
 #include "serial.h"
 #include "stream.h"
 #include "interrupt.h"
+#include "physmem.h"
 
 void _start()
 {
 	stream_init();
+
+	physmem_init();
 
 	interrupt_wipe();
 	interrupt_flush();
