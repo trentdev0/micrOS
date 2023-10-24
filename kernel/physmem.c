@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "limine.h"
 #include "stream.h"
@@ -27,10 +28,21 @@ void physmem_init()
 		switch (entry->type)
 		{
 		case LIMINE_MEMMAP_USABLE:
+			/* The value memory_minimum represents the start of the region of free memory. */
 			regions[regions_size].memory_minimum = entry->base;
+			/* The value memory_size represents the exact amount of free memory in bytes. */
 			regions[regions_size].memory_size = entry->length;
+			/* The value memory_maximum represents the end of the region of free memory. */
 			regions[regions_size].memory_maximum = entry->base + entry->length;
+			/* The value pages_maximum represents the maximum amount of 4KiB pages that can be achieved using this region of free memory. */
 			regions[regions_size].pages_maximum = regions[regions_size].memory_size / PAGE_SIZE;
+			/* The value exact_memory_size represents the exact amount of memory in bytes that can be made using the maximum amount of pages. */
+			regions[regions_size].exact_memory_size = regions[regions_size].pages_maximum * PAGE_SIZE;
+			/*
+			 *	The value status_region_count represents the amount of pages that are automatically allocated for knowing the status of
+			 *	of all pages in the region of memory.
+			 */
+			regions[regions_size].status_region_count = ((regions[regions_size].pages_maximum + 7) / 8) / PAGE_SIZE;
 			regions_size++;
 			break;
 		}
