@@ -55,3 +55,31 @@ void physmem_init()
 		stream_printf(current_stream, "[PHYSMEM]:\033[15GHere's an chunk of free & usable memory (min=\"0x%lx\", max=\"0x%lx\", maxpages=\"%ld\")!\r\n", regions[i].memory_minimum, regions[i].memory_maximum, regions[i].pages_maximum);
 	}
 }
+
+/* Return an index in status region for page that is free... */
+uint64_t physmem_find_free(uint64_t index)
+{
+	uint8_t * byte = (uint8_t *)regions[index].memory_minimum;
+
+	for(uint64_t i = 0; i < (regions[index].memory_size / 8); i++)
+	{
+		if(byte[i] != 0xFF)
+		{
+			for(int j = 0; j < 8; j++)
+			{
+				if((byte[i] & (1 << j)) == 0)
+				{
+					return i * 8 + j;
+				}
+			}
+		}
+	}
+
+	/* In this case, 0xFFFFFFFFFFFFFFFF is our error code, since it's the most rare number for us! */
+	return 0xFFFFFFFFFFFFFFFF;
+}
+
+uint64_t physmem_index_to_address(uint64_t)
+{
+
+}

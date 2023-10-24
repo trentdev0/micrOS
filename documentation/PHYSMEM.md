@@ -1,0 +1,4 @@
+# Physical memory
+## About
+M/UX handles memory in 4KiB pages (4096 bytes). When setting up a region, the physical memory manager (`physmem.c` & `physmem.h`) will calculate the size in pages, and create a subregion called the status region. The status region's size in bits is determined by the max amount of pages that the region can store. When the bit is set to `1`, the page is allocated, and when set to `0`, the page's memory is free.
+The only possible issue with this physical memory manager is the fact that something as simple as a bitflip can potentially cause a lot of chaos, however we ignore this issue.

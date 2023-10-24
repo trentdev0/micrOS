@@ -41,3 +41,5 @@ static inline void physmem_mark_deallocated(uint64_t index)
 	uint8_t * byte = (uint8_t *)regions[index].memory_minimum;
 	setbit(byte, index, false);
 }
+
+uint64_t physmem_find_free(uint64_t index);
