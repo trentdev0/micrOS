@@ -38,11 +38,13 @@ void physmem_init()
 			regions[regions_size].pages_maximum = regions[regions_size].memory_size / PAGE_SIZE;
 			/* The value exact_memory_size represents the exact amount of memory in bytes that can be made using the maximum amount of pages. */
 			regions[regions_size].exact_memory_size = regions[regions_size].pages_maximum * PAGE_SIZE;
+			/* The value status_region_byte_count represents the amount of bytes that are needed to represent the status of all pages in the region. */
+			regions[regions_size].status_region_byte_count = (regions[regions_size].pages_maximum + 7) / 8;
 			/*
-			 *	The value status_region_count represents the amount of pages that are automatically allocated for knowing the status of
+			 *	The value status_region_page_count represents the amount of pages that are automatically allocated for knowing the status of
 			 *	of all pages in the region of memory.
 			 */
-			regions[regions_size].status_region_count = ((regions[regions_size].pages_maximum + 7) / 8) / PAGE_SIZE;
+			regions[regions_size].status_region_page_count = ((regions[regions_size].pages_maximum + 7) / 8) / PAGE_SIZE;
 			regions_size++;
 			break;
 		}
