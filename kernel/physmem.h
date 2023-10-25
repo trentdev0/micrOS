@@ -49,7 +49,7 @@ static inline uint64_t physmem_index_to_address(uint64_t index0, uint64_t index1
 	return regions[index0].memory_minimum + (index1 * PAGE_SIZE) + (regions[index0].status_region_page_count * PAGE_SIZE);
 }
 
-static inline uint64_t physmem_address_to_index(uint64_t index, uint64_t address)
+static inline uint64_t physmem_address_to_index(uint64_t index0, uint64_t address)
 {
-	return (address - regions[index].status_region_byte_count) / PAGE_SIZE;;
+	return (address - regions[index0].memory_minimum) / PAGE_SIZE;
 }
