@@ -76,33 +76,25 @@ int acpi_init()
 		return -3;
 	}
 
-	size_t offset = 0;
-	for(;;)
+	for(size_t offset = 0; madt->sdt.length - sizeof(madt_t) - offset >= 2;)
 	{
-		if(madt->sdt.length - sizeof(madt_t) - offset < 2)
-		{
-			break;
-		}
-
 		header_t * header = (header_t *)(madt->entries_data + offset);
 
-		switch(header->id)
+		switch (header->id)
 		{
-		case 0: {
-				lapic_t * lapic = (lapic_t *)header;
-				(void)lapic;
-				stream_printf(current_stream, "[ACPI]:\033[15GDetected an LAPIC!\r\n");
-			}
+		case 0: ;
+			lapic_t * lapic = (lapic_t *)header;
+			(void)lapic;
+			stream_printf(current_stream, "[ACPI]:\033[15GDetected an LAPIC!\r\n");
 			break;
-		case 1: {
-				ioapic_t * ioapic = (ioapic_t *)header;
-				(void)ioapic;
-				stream_printf(current_stream, "[ACPI]:\033[15GDetected an IOAPIC!\r\n");
-			}
+		case 1: ;
+			ioapic_t * ioapic = (ioapic_t *)header;
+			(void)ioapic;
+			stream_printf(current_stream, "[ACPI]:\033[15GDetected an IOAPIC!\r\n");
 			break;
-		default: {
-				stream_printf(current_stream, "[ACPI]:\033[15GDetected an unknown device, got type %d.\r\n", header->id);
-			}
+		default:
+			stream_printf(current_stream, "[ACPI]:\033[15GDetected an unknown device, got type \"%d\".\r\n", header->id);
+			break;
 		}
 
 		offset += header->length;

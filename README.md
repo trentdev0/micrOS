@@ -1,6 +1,6 @@
 # M/UX
 ## About
-M/UX is a work-in-progress UNIX-like kernel for amd64 processors, designed to run with the limine bootloader.
+M/UX is a work-in-progress UNIX-like kernel for amd64 processors, designed to run with the limine bootloader, a bootloader with a superior boot protocol.
 ## Roadmap
 - [ ] GDT (Global Descriptor Table)
 - [X] IDT (Interrupt Descriptor Table)
@@ -8,7 +8,7 @@ M/UX is a work-in-progress UNIX-like kernel for amd64 processors, designed to ru
 - [X] Serial
 - [X] ACPI
 - [ ] Timer interrupt
-- [ ] Physical memory management
+- [X] Physical memory management
 - [ ] Virtual memory management
 - [ ] Multitasking
 - [ ] Virtual filesystem
