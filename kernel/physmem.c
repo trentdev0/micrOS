@@ -70,7 +70,7 @@ uint64_t physmem_find_free(uint64_t index)
 	{
 		if(byte[i] != 0xFF)
 		{
-			for(int j = 0; j < 8; j++)
+			for(uint64_t j = 0; j < 8; j++)
 			{
 				if((byte[i] & (1 << j)) == 0)
 				{

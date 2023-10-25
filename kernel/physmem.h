@@ -59,9 +59,12 @@ static inline uint64_t physmem_index_to_address(uint64_t index0, uint64_t index1
 
 static inline uint64_t physmem_address_to_index(uint64_t index0, uint64_t address)
 {
-	if(address >= regions[index0].memory_minimum && address < regions[index0].memory_maximum)
+	if (address >= regions[index0].memory_minimum && address < regions[index0].memory_maximum)
 	{
-		return (address - regions[index0].memory_minimum) / PAGE_SIZE;
+		uint64_t offset = address - regions[index0].memory_minimum;
+		// Subtract only the size of the status region (byte count)
+		uint64_t status_region_byte_count = regions[index0].status_region_byte_count;
+		return offset / PAGE_SIZE - status_region_byte_count / PAGE_SIZE;
 	}
 
 	return 0xFFFFFFFFFFFFFFFF;
