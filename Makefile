@@ -21,7 +21,7 @@ ifeq ($(ARCH), amd64-pc)
 	OBJ_FILES += $(ARCH_OBJ_C_FILES) $(ARCH_OBJ_S_FILES)
 endif
 
-.PHONY: all clean limine cdrom run run-serial
+.PHONY: all clean limine cdrom run run-serial debug
 
 all: kernel.elf cdrom
 
@@ -54,6 +54,9 @@ limine:
 
 run:
 	qemu-system-x86_64 -cdrom image.iso
+
+debug:
+	qemu-system-x86_64 -s -S -cdrom image.iso
 
 run-serial:
 	xterm -hold -e "qemu-system-x86_64 -nographic -serial mon:stdio -cdrom image.iso"
