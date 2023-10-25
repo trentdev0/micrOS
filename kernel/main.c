@@ -25,6 +25,15 @@ void _start()
 		stream_printf(current_stream, "Here's a free page index: \"0x%lx\"!\r\n", physmem_find_free(1));
 	}
 
+	while(1)
+	{
+		void * my_pointer0 = physmem_alloc();
+		stream_printf(current_stream, "Allocated a page! Here's it's address: 0x%lx!\r\n", (uint64_t)my_pointer0);
+		int my_ret0 = physmem_free(my_pointer0);
+		stream_printf(current_stream, "Freed the page! Got return code: %d.\r\n", my_ret0);
+	}
+	
+
 	interrupt_wipe();
 	interrupt_flush();
 	interrupt_register(0, &interrupt0, 0x8E);

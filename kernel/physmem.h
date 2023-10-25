@@ -28,6 +28,14 @@ static inline void setbit(uint8_t * array, uint64_t index, bool value)
 	}
 }
 
+static inline bool getbit(uint8_t * array, uint64_t index)
+{
+	uint64_t byte_index = index / 8;
+	uint64_t bit_offset = index % 8;
+
+	return (array[byte_index] & (1 << bit_offset)) != 0;
+}
+
 void physmem_init();
 
 static inline void physmem_mark_allocated(uint64_t index0, uint64_t index1)
@@ -59,4 +67,5 @@ static inline uint64_t physmem_address_to_index(uint64_t index0, uint64_t addres
 	return 0xFFFFFFFFFFFFFFFF;
 }
 
-uint64_t physmem_find_free1();
+page_t * physmem_alloc();
+int physmem_free(page_t * page);

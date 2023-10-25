@@ -66,7 +66,7 @@ uint64_t physmem_find_free(uint64_t index)
 {
 	uint8_t * byte = (uint8_t *)regions[index].memory_minimum;
 
-	for(uint64_t i = 0; i < (regions[index].memory_size / 8); i++)
+	for(uint64_t i = 0; i < (regions[index].status_region_byte_count); i++)
 	{
 		if(byte[i] != 0xFF)
 		{
@@ -74,7 +74,7 @@ uint64_t physmem_find_free(uint64_t index)
 			{
 				if((byte[i] & (1 << j)) == 0)
 				{
-					return i * 8 + j;
+					return (i * 8 + j);
 				}
 			}
 		}
@@ -91,14 +91,27 @@ page_t * physmem_alloc()
 		uint64_t j = physmem_find_free(i);
 		if(j != 0xFFFFFFFFFFFFFFFF)
 		{
-			return (void *)j;
+			uint64_t k = physmem_index_to_address(i, j);
+			physmem_mark_allocated(i, j);
+			return (page_t *)k;
 		}
 	}
 
 	return NULL;
 }
 
-void physmem_free(page_t * page)
+int physmem_free(page_t * page)
 {
-	(void)page;
+	for(uint64_t i = 0; i < regions_size; i++)
+	{
+		uint64_t index = physmem_address_to_index(i, (uint64_t)page);
+
+		if(index != 0xFFFFFFFFFFFFFFFF)
+		{
+			physmem_mark_deallocated(i, index);
+			return 0;
+		}
+	}
+
+	return -1;
 }
