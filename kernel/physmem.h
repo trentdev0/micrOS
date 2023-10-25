@@ -51,5 +51,12 @@ static inline uint64_t physmem_index_to_address(uint64_t index0, uint64_t index1
 
 static inline uint64_t physmem_address_to_index(uint64_t index0, uint64_t address)
 {
-	return (address - regions[index0].memory_minimum) / PAGE_SIZE;
+	if(address >= regions[index0].memory_minimum && address < regions[index0].memory_maximum)
+	{
+		return (address - regions[index0].memory_minimum) / PAGE_SIZE;
+	}
+
+	return 0xFFFFFFFFFFFFFFFF;
 }
+
+uint64_t physmem_find_free1();

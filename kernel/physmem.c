@@ -83,3 +83,22 @@ uint64_t physmem_find_free(uint64_t index)
 	/* In this case, 0xFFFFFFFFFFFFFFFF is our error code, since it's the most rare number for us! */
 	return 0xFFFFFFFFFFFFFFFF;
 }
+
+page_t * physmem_alloc()
+{
+	for(uint64_t i = 0; i < regions_size; i++)
+	{
+		uint64_t j = physmem_find_free(i);
+		if(j != 0xFFFFFFFFFFFFFFFF)
+		{
+			return (void *)j;
+		}
+	}
+
+	return NULL;
+}
+
+void physmem_free(page_t * page)
+{
+	(void)page;
+}
