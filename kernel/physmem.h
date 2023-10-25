@@ -30,16 +30,26 @@ static inline void setbit(uint8_t * array, uint64_t index, bool value)
 
 void physmem_init();
 
-static inline void physmem_mark_allocated(uint64_t index)
+static inline void physmem_mark_allocated(uint64_t index0, uint64_t index1)
 {
-	uint8_t * byte = (uint8_t *)regions[index].memory_minimum;
-	setbit(byte, index, true);
+	uint8_t * byte = (uint8_t *)regions[index0].memory_minimum;
+	setbit(byte, index1, true);
 }
 
-static inline void physmem_mark_deallocated(uint64_t index)
+static inline void physmem_mark_deallocated(uint64_t index0, uint64_t index1)
 {
-	uint8_t * byte = (uint8_t *)regions[index].memory_minimum;
-	setbit(byte, index, false);
+	uint8_t * byte = (uint8_t *)regions[index0].memory_minimum;
+	setbit(byte, index1, false);
 }
 
 uint64_t physmem_find_free(uint64_t index);
+
+static inline uint64_t physmem_index_to_address(uint64_t index0, uint64_t index1)
+{
+	return regions[index0].memory_minimum + (index1 * PAGE_SIZE) + (regions[index0].status_region_page_count * PAGE_SIZE);
+}
+
+static inline uint64_t physmem_address_to_index(uint64_t index, uint64_t address)
+{
+	return (address - regions[index].status_region_byte_count) / PAGE_SIZE;;
+}

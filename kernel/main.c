@@ -15,6 +15,15 @@ void _start()
 
 	physmem_init();
 
+	for(int i = 0; i < 10; i++)
+	{
+		uint64_t addr = physmem_index_to_address(1, i);
+		uint64_t indx = physmem_address_to_index(1, addr);
+
+		stream_printf(current_stream, "Here's an address: \"0x%lx\"!\r\n", addr);
+		stream_printf(current_stream, "Here's a page index: \"0x%lx\"!\r\n", indx);
+	}
+
 	interrupt_wipe();
 	interrupt_flush();
 	interrupt_register(0, &interrupt0, 0x8E);

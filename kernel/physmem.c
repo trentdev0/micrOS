@@ -45,6 +45,11 @@ void physmem_init()
 			 *	of all pages in the region of memory.
 			 */
 			regions[regions_size].status_region_page_count = ((regions[regions_size].pages_maximum + 7) / 8) / PAGE_SIZE;
+			if(regions[regions_size].status_region_page_count < 1)
+			{
+				regions[regions_size].status_region_page_count = 1;
+			}
+
 			regions_size++;
 			break;
 		}
@@ -56,7 +61,7 @@ void physmem_init()
 	}
 }
 
-/* Return an index in status region for page that is free... */
+/* Return the first 0 bit by region index. */
 uint64_t physmem_find_free(uint64_t index)
 {
 	uint8_t * byte = (uint8_t *)regions[index].memory_minimum;
@@ -77,9 +82,4 @@ uint64_t physmem_find_free(uint64_t index)
 
 	/* In this case, 0xFFFFFFFFFFFFFFFF is our error code, since it's the most rare number for us! */
 	return 0xFFFFFFFFFFFFFFFF;
-}
-
-uint64_t physmem_index_to_address(uint64_t)
-{
-
 }
