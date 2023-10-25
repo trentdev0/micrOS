@@ -1,4 +1,5 @@
 # Physical memory
 ## About
 M/UX handles memory in 4KiB pages (4096 bytes). When setting up a region, the physical memory manager (`physmem.c` & `physmem.h`) will calculate the size in pages, and create a subregion called the status region. The status region's size in bits is determined by the max amount of pages that the region can store. When the bit is set to `1`, the page is allocated, and when set to `0`, the page's memory is free.
-The only possible issue with this physical memory manager is the fact that something as simple as a bitflip can potentially cause a lot of chaos, however we ignore this issue.
+Whenever the physical memory manager needs to find a free page, it will just loop for all bits in the status subregion of all regions, until it finds a `0`. Once it finds the zero, it calculates the actual address from the position of the zero in the status subregion.
+After doing some research, M/UX's physical memory manager is apparently considered a [bitmap allocator](https://gcc.gnu.org/onlinedocs/libstdc++/manual/bitmap_allocator.html). The difference however, is that a `0` represents a free page and a `1` represents an allocated page.
