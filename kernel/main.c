@@ -38,7 +38,7 @@ void _start()
 	/* Set value to 0000000000000000000000000000000000000000000000000000000000000011. */
 	physmem_setbit((uint8_t *)&value, 1, true);
 	stream_printf(current_stream, "Value after setting it's second bit: %lx.\r\n", value);
-	/* Set value to 0000000000000000000000000000000000000000000000000000000000000011. */
+	/* Set value to 0000000000000000000000000000000000000000000000000000000000000010. */
 	physmem_setbit((uint8_t *)&value, 0, false);
 	stream_printf(current_stream, "Value after setting it's first bit again: %lx.\r\n", value);
 
