@@ -11,7 +11,16 @@ OBJ_C_FILES := $(patsubst $(SRC_DIR)/%.c, $(SRC_DIR)/%.o, $(SRC_C_FILES))
 OBJ_S_FILES := $(patsubst $(SRC_DIR)/%.S, $(SRC_DIR)/%.o, $(SRC_S_FILES))
 OBJ_FILES := $(OBJ_C_FILES) $(OBJ_S_FILES)
 
+3RDPARTY ?= true
 ARCH ?= amd64-pc
+
+ifeq ($(3RDPARTY), true)
+	3RDPARTY_SRC_C_FILES := $(wildcard $(SRC_DIR)/thirdparty/*.c)
+	3RDPARTY_SRC_S_FILES := $(wildcard $(SRC_DIR)/thirdparty/*.S)
+	3RDPARTY_OBJ_C_FILES := $(patsubst $(SRC_DIR)/thirdparty/%.c, $(SRC_DIR)/thirdparty/%.o, $(SRC_C_FILES))
+	3RDPARTY_OBJ_S_FILES := $(patsubst $(SRC_DIR)/thirdparty/%.S, $(SRC_DIR)/thirdparty/%.o, $(SRC_S_FILES))
+	OBJ_FILES += $(3RDPARTY_OBJ_C_FILES) $(3RDPARTY_OBJ_S_FILES)
+endif
 
 ifeq ($(ARCH), amd64-pc)
 	ARCH_C_FILES := $(wildcard $(SRC_DIR)/arch/amd64-pc/*.c)
@@ -48,6 +57,14 @@ ifeq ($(ARCH), amd64-pc)
 		$(AS) $< -o $@
 endif
 
+ifeq ($(3RDPARTY), true)
+	$(SRC_DIR)/thirdparty/%.o: $(SRC_DIR)/thirdparty/%.c
+		$(CC) $(CFLAGS) -c $< -o $@
+
+	$(SRC_DIR)/thirdparty/%.o: $(SRC_DIR)/thirdparty/%.S
+		$(AS) $< -o $@
+endif
+
 limine:
 	git clone https://github.com/limine-bootloader/limine.git --branch=v4.x-branch-binary --depth=1
 	make -C limine
@@ -62,4 +79,4 @@ run-serial:
 	xterm -hold -e "qemu-system-x86_64 -nographic -serial mon:stdio -cdrom image.iso"
 
 clean:
-	rm -f kernel/*.o kernel/*.d kernel.elf image.iso
+	rm -f kernel/*.o kernel/*.d kernel/arch/amd64-pc/*.o kernel/arch/amd64-pc/*.d kernel/thirdparty/*.o kernel/thirdparty/*.d kernel.elf image.iso

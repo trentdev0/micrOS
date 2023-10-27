@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "limine.h"
+#include "thirdparty/limine.h"
 #include "arch/amd64-pc/cpu.h"
 #include "arch/amd64-pc/acpi.h"
 #include "serial.h"
@@ -41,6 +41,8 @@ void _start()
 	/* Set value to 0000000000000000000000000000000000000000000000000000000000000010. */
 	physmem_setbit((uint8_t *)&value, 0, false);
 	stream_printf(current_stream, "Value after setting it's first bit again: %lx.\r\n", value);
+
+	physmem_printbitmap(0);
 
 	hang();
 }
