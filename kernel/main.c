@@ -29,5 +29,18 @@ void _start()
 
 	stream_printf(current_stream, "Hello, world!\r\n");
 
+	/* Set value to 0! */
+	uint64_t value = 0;
+	stream_printf(current_stream, "Value before setting it's first bit: %lx.\r\n", value);
+	/* Set value to 0000000000000000000000000000000000000000000000000000000000000001. */
+	physmem_setbit((uint8_t *)&value, 0, true);
+	stream_printf(current_stream, "Value after setting it's first bit: %lx.\r\n", value);
+	/* Set value to 0000000000000000000000000000000000000000000000000000000000000011. */
+	physmem_setbit((uint8_t *)&value, 1, true);
+	stream_printf(current_stream, "Value after setting it's second bit: %lx.\r\n", value);
+	/* Set value to 0000000000000000000000000000000000000000000000000000000000000011. */
+	physmem_setbit((uint8_t *)&value, 0, false);
+	stream_printf(current_stream, "Value after setting it's first bit again: %lx.\r\n", value);
+
 	hang();
 }
