@@ -99,19 +99,3 @@ page_t * physmem_alloc()
 
 	return NULL;
 }
-
-int physmem_free(page_t * page)
-{
-	for(uint64_t i = 0; i < regions_size; i++)
-	{
-		uint64_t index = physmem_address_to_index(i, (uint64_t)page);
-
-		if(index != 0xFFFFFFFFFFFFFFFF)
-		{
-			physmem_mark_deallocated(i, index);
-			return 0;
-		}
-	}
-
-	return -1;
-}

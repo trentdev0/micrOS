@@ -71,4 +71,8 @@ static inline uint64_t physmem_address_to_index(uint64_t index0, uint64_t addres
 }
 
 page_t * physmem_alloc();
-int physmem_free(page_t * page);
+
+static inline int physmem_free(page_t * page)
+{
+	return 0;
+}
