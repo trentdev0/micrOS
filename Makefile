@@ -11,7 +11,7 @@ OBJ_C_FILES := $(patsubst $(SRC_DIR)/%.c, $(SRC_DIR)/%.o, $(SRC_C_FILES))
 OBJ_S_FILES := $(patsubst $(SRC_DIR)/%.S, $(SRC_DIR)/%.o, $(SRC_S_FILES))
 OBJ_FILES := $(OBJ_C_FILES) $(OBJ_S_FILES)
 
-3RDPARTY ?= true
+3RDPARTY ?= false
 ARCH ?= amd64-pc
 
 ifeq ($(3RDPARTY), true)

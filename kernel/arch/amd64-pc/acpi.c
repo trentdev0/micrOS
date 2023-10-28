@@ -1,7 +1,7 @@
 #include <stddef.h>
 
 #include "acpi.h"
-#include "../../limine.h"
+#include "../../thirdparty/limine.h"
 #include "../../stream.h"
 #include "../../string.h"
 #include "cpu.h"

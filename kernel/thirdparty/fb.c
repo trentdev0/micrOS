@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "../flanterm.h"
+#include "flanterm.h"
 #include "fb.h"
 
 void *memset(void *, int, size_t);
