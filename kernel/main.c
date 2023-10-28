@@ -27,15 +27,16 @@ void _start()
 	stream_printf(current_stream, "Allocating a page!\r\nHere's the address: 0x%lx!\r\n", pointer1);
 	stream_printf(current_stream, "Allocating a page!\r\nHere's the address: 0x%lx!\r\n", pointer2);
 
-	physmem_printbitmap(0);
-
+	stream_printf(current_stream, "Freeing a page!\r\n");
 	physmem_free(pointer0);
+	stream_printf(current_stream, "Freeing a page!\r\n");
 	physmem_free(pointer1);
+	stream_printf(current_stream, "Freeing a page!\r\n");
 	physmem_free(pointer2);
 
-	physmem_printbitmap(0);
-
-	stream_printf(current_stream, "Allocating a page!\r\nHere's the address: 0x%lx!\r\n", physmem_alloc());
+	uint64_t pointer3 = physmem_alloc();
+	stream_printf(current_stream, "Allocating a page again!\r\nHere's the address: 0x%lx!\r\n", pointer3);
+	physmem_free(pointer3);
 
 	hang();
 }
