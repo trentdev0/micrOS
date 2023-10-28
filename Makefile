@@ -4,30 +4,30 @@ OBJCOPY := x86_64-elf-objcopy
 CFLAGS := -g -pipe -Wall -Wextra -std=gnu11 -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pie -fno-pic -m64 -march=x86-64 -mabi=sysv -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -I. -MMD
 LDFLAGS := -Tlinker.ld -ffreestanding -nostdlib
 
-SRC_DIR := kernel
-SRC_C_FILES := $(wildcard $(SRC_DIR)/*.c)
-SRC_S_FILES := $(wildcard $(SRC_DIR)/*.S)
-OBJ_C_FILES := $(patsubst $(SRC_DIR)/%.c, $(SRC_DIR)/%.o, $(SRC_C_FILES))
-OBJ_S_FILES := $(patsubst $(SRC_DIR)/%.S, $(SRC_DIR)/%.o, $(SRC_S_FILES))
+KERNEL := kernel
+SRC_C_FILES := $(wildcard $(KERNEL)/*.c)
+SRC_S_FILES := $(wildcard $(KERNEL)/*.S)
+OBJ_C_FILES := $(patsubst $(KERNEL)/%.c, $(KERNEL)/%.o, $(SRC_C_FILES))
+OBJ_S_FILES := $(patsubst $(KERNEL)/%.S, $(KERNEL)/%.o, $(SRC_S_FILES))
 OBJ_FILES := $(OBJ_C_FILES) $(OBJ_S_FILES)
 
 3RDPARTY ?= true
 ARCH ?= amd64-pc
 
 ifeq ($(3RDPARTY), true)
-	3RDPARTY_SRC_C_FILES := $(wildcard $(SRC_DIR)/thirdparty/*.c)
-	3RDPARTY_SRC_S_FILES := $(wildcard $(SRC_DIR)/thirdparty/*.S)
-	3RDPARTY_OBJ_C_FILES := $(patsubst $(SRC_DIR)/thirdparty/%.c, $(SRC_DIR)/thirdparty/%.o, $(3RDPARTY_SRC_C_FILES))
-	3RDPARTY_OBJ_S_FILES := $(patsubst $(SRC_DIR)/thirdparty/%.S, $(SRC_DIR)/thirdparty/%.o, $(3RDPARTY_SRC_S_FILES))
+	3RDPARTY_SRC_C_FILES := $(wildcard $(KERNEL)/thirdparty/*.c)
+	3RDPARTY_SRC_S_FILES := $(wildcard $(KERNEL)/thirdparty/*.S)
+	3RDPARTY_OBJ_C_FILES := $(patsubst $(KERNEL)/thirdparty/%.c, $(KERNEL)/thirdparty/%.o, $(3RDPARTY_SRC_C_FILES))
+	3RDPARTY_OBJ_S_FILES := $(patsubst $(KERNEL)/thirdparty/%.S, $(KERNEL)/thirdparty/%.o, $(3RDPARTY_SRC_S_FILES))
 	OBJ_FILES += $(3RDPARTY_OBJ_C_FILES) $(3RDPARTY_OBJ_S_FILES)
 	CFLAGS += -DTHIRDPARTY
 endif
 
 ifeq ($(ARCH), amd64-pc)
-	ARCH_C_FILES := $(wildcard $(SRC_DIR)/arch/amd64-pc/*.c)
-	ARCH_S_FILES := $(wildcard $(SRC_DIR)/arch/amd64-pc/*.S)
-	ARCH_OBJ_C_FILES := $(patsubst $(SRC_DIR)/arch/amd64-pc/%.c, $(SRC_DIR)/arch/amd64-pc/%.o, $(ARCH_C_FILES))
-	ARCH_OBJ_S_FILES := $(patsubst $(SRC_DIR)/arch/amd64-pc/%.S, $(SRC_DIR)/arch/amd64-pc/%.o, $(ARCH_S_FILES))
+	ARCH_C_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.c)
+	ARCH_S_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.S)
+	ARCH_OBJ_C_FILES := $(patsubst $(KERNEL)/arch/amd64-pc/%.c, $(KERNEL)/arch/amd64-pc/%.o, $(ARCH_C_FILES))
+	ARCH_OBJ_S_FILES := $(patsubst $(KERNEL)/arch/amd64-pc/%.S, $(KERNEL)/arch/amd64-pc/%.o, $(ARCH_S_FILES))
 	OBJ_FILES += $(ARCH_OBJ_C_FILES) $(ARCH_OBJ_S_FILES)
 endif
 
@@ -44,25 +44,25 @@ cdrom:
 kernel.elf: $(OBJ_FILES)
 	$(CC) $(LDFLAGS) $^ -o $@
 
-$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
+$(KERNEL)/%.o: $(KERNEL)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/%.o: $(SRC_DIR)/%.S
+$(KERNEL)/%.o: $(KERNEL)/%.S
 	$(AS) $< -o $@
 
 ifeq ($(ARCH), amd64-pc)
-	$(SRC_DIR)/arch/amd64-pc/%.o: $(SRC_DIR)/arch/amd64-pc/%.c
+	$(KERNEL)/arch/amd64-pc/%.o: $(KERNEL)/arch/amd64-pc/%.c
 		$(CC) $(CFLAGS) -c $< -o $@
 
-	$(SRC_DIR)/arch/amd64-pc/%.o: $(SRC_DIR)/arch/amd64-pc/%.S
+	$(KERNEL)/arch/amd64-pc/%.o: $(KERNEL)/arch/amd64-pc/%.S
 		$(AS) $< -o $@
 endif
 
 ifeq ($(3RDPARTY), true)
-	$(SRC_DIR)/thirdparty/%.o: $(SRC_DIR)/thirdparty/%.c
+	$(KERNEL)/thirdparty/%.o: $(KERNEL)/thirdparty/%.c
 		$(CC) $(CFLAGS) -c $< -o $@
 
-	$(SRC_DIR)/thirdparty/%.o: $(SRC_DIR)/thirdparty/%.S
+	$(KERNEL)/thirdparty/%.o: $(KERNEL)/thirdparty/%.S
 		$(AS) $< -o $@
 endif
 
