@@ -74,11 +74,17 @@ void physmem_init()
 	}
 }
 
+/* Convert an address to an index, by region index. */
+uint64_t physmem_address2index(uint64_t index, uint64_t address) { }
+
+/* Convert an index to an address, by region index. */
+uint64_t physmem_index2address(uint64_t index0, uint64_t index1) { }
+
 /* Display the bitmap of a specific region by the region's index. */
 void physmem_printbitmap(uint64_t index)
 {
 	uint8_t * buffer = (uint8_t *)regions[index].memory_minimum;
-	for(uint64_t i = 0; i < regions[index].status_bytes_size; i++)
+	for(uint64_t i = 0; i < regions[index].status_bits_size; i++)
 	{
 		if(physmem_getbit(buffer, i) == true)
 		{

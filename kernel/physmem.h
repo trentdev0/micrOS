@@ -27,6 +27,7 @@ typedef struct { uint8_t bytes[PAGE_SIZE]; } page_t;
 extern region_t regions[32];
 extern size_t regions_size;
 
+/* Set the state of a bit in memory. */
 static inline void physmem_setbit(uint8_t * array, uint64_t index, bool value)
 {
 	uint64_t byte_index = index / 8;
@@ -42,12 +43,34 @@ static inline void physmem_setbit(uint8_t * array, uint64_t index, bool value)
 	}
 }
 
+/* Get the state of a bit in memory. */
 static inline bool physmem_getbit(uint8_t * array, uint64_t index)
 {
 	uint64_t byte_index = index / 8;
 	uint64_t bit_offset = index % 8;
 
 	return (array[byte_index] & (1 << bit_offset)) != 0;
+}
+
+/* Convert number of pages into bytes... */
+static inline uint64_t physmem_page2byte(uint64_t pages)
+{
+	return pages * PAGE_SIZE;
+}
+
+/* Convert bytes to amount of pages, returns 1 at least. */
+static inline uint64_t physmem_byte2page(uint64_t bytes)
+{
+	uint64_t return_value = 0;
+	return_value = bytes / PAGE_SIZE;
+
+	if(return_value == 0)
+	{
+		return_value = 1;
+		return return_value;
+	}
+
+	return return_value;
 }
 
 void physmem_init();
