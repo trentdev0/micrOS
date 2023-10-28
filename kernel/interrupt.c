@@ -33,6 +33,7 @@ void interrupt_flush()
 	asm volatile ("lidt %0" :: "m"(descriptor) : "memory");
 }
 
+#if defined(THIRDPARTY)
 void interrupt0(frame_t * frame)
 {
 	(void)frame;
@@ -95,4 +96,5 @@ void interrupt32(frame_t * frame)
 
 	stream_printf(current_stream, "[INTERRUPT]:\033[15GPIT interrupt triggered!\r\n");
 }
+#endif
 #endif

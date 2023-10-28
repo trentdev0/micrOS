@@ -3,12 +3,33 @@
 #include "stream.h"
 #include "serial.h"
 #include "string.h"
+#include "thirdparty/limine.h"
+#include "thirdparty/fb.h"
+#include "thirdparty/flanterm.h"
 
 stream_t streams[8];
 stream_t * current_stream;
 
+#if defined(THIRDPARTY)
+struct flanterm_context * flanterm;
+
+static volatile struct limine_framebuffer_request framebuffer_request = {
+	.id = LIMINE_FRAMEBUFFER_REQUEST,
+	.revision = 0
+};
+
+void flanterm_putc(char character)
+{
+	flanterm_write(flanterm, &character, 1);
+}
+#endif
+
 void stream_init()
 {
+#if defined(THIRDPARTY)
+	flanterm = flanterm_fb_simple_init(framebuffer_request.response->framebuffers[0]->address, framebuffer_request.response->framebuffers[0]->width, framebuffer_request.response->framebuffers[0]->height, framebuffer_request.response->framebuffers[0]->pitch);
+#endif
+
 	serial_init(COM1);
 	serial_init(COM2);
 	serial_init(COM3);
@@ -34,7 +55,13 @@ void stream_init()
 	streams[6].write = &com7_write;
 	streams[7].read = &com8_read;
 	streams[7].write = &com8_write;
+#if defined(THIRDPARTY)
+	streams[8].read = NULL;
+	streams[8].write = &flanterm_putc;
+	current_stream = &streams[8];
+#else
 	current_stream = &streams[0];
+#endif
 }
 
 int stream_printf(stream_t *stream, const char *format, ...)

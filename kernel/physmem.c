@@ -51,17 +51,7 @@ void physmem_init()
 			 *	Stores the amount of pages needed to store the allocation status of all pages in the region.
 			 *	It may require some optimization, see the comment below this one.
 			 */
-			regions[regions_size].status_pages_size = regions[regions_size].status_bytes_size / PAGE_SIZE;
-
-			/*
-			 *	In systems with small amounts of RAM, we'll usually require way less than 1 page
-			 *	to store the allocation status of each page, therefore it must be set to 1 if it's
-			 *	zero.
-			 */
-			if(regions[regions_size].status_pages_size == 0)
-			{
-				regions[regions_size].status_pages_size = 1;
-			}
+			regions[regions_size].status_pages_size = physmem_byte2page(regions[regions_size].status_bytes_size);
 
 			regions_size++;
 			break;
@@ -75,10 +65,18 @@ void physmem_init()
 }
 
 /* Convert an address to an index, by region index. */
-uint64_t physmem_address2index(uint64_t index, uint64_t address) { }
+uint64_t physmem_address2index(uint64_t index, uint64_t address)
+{
+	(void)index; (void)address;
+	return 0;
+}
 
 /* Convert an index to an address, by region index. */
-uint64_t physmem_index2address(uint64_t index0, uint64_t index1) { }
+uint64_t physmem_index2address(uint64_t index0, uint64_t index1)
+{
+	(void)index0; (void)index1;
+	return 0;
+}
 
 /* Display the bitmap of a specific region by the region's index. */
 void physmem_printbitmap(uint64_t index)
