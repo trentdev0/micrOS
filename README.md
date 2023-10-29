@@ -36,7 +36,7 @@ make run-kvm
 # Debugging
 You can also debug the kernel in VSCode by running `make debug` or `make debug-kvm`, switching to the `Run and Debug` section, and then running `kernel`:
 
-![Here's how you debug the kernel in Visual Studio Code!](.assets/screenshot0.png).
+![Here's how you debug the kernel in Visual Studio Code!](.assets/screenshot0.png)
 
 If you just want to debug with GDB, run `make debug` or `make debug-kvm`, and run GDB. After starting GDB, run the following commands in GDB:
 ```
