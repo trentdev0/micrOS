@@ -87,7 +87,7 @@ void virtmem_init()
 		virtmem_map(&kernel_pagemap, physical + i, virtual + i, PTE_PRESENT | PTE_WRITABLE);
 	}
 
-	for(uint64_t i = 0x1000; i < 0x100000000; i += PAGE_SIZE)
+	for(uint64_t i = PAGE_SIZE; i < 0x100000000; i += PAGE_SIZE)
 	{
 		virtmem_map(&kernel_pagemap, i, i, PTE_PRESENT | PTE_WRITABLE);
 		virtmem_map(&kernel_pagemap, i, i + hhdm_request.response->offset, PTE_PRESENT | PTE_WRITABLE);
