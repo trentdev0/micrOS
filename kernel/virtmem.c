@@ -79,7 +79,7 @@ void virtmem_init()
 
 	uint64_t virtual = kernel_address_request.response->virtual_base;
 	uint64_t physical = kernel_address_request.response->physical_base;
-	uint64_t length = ((((uint64_t)kernel_end_addr + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE) - virtual;
+	uint64_t length = ((((uint64_t)kernel_end + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE) - virtual;
 
 	for(uint64_t i = 0; i < length; i += PAGE_SIZE)
 	{

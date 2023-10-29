@@ -29,3 +29,18 @@ This should fix the error you get from limine not being present. Then, try again
 make run
 ```
 Make sure you have QEMU installed in order to get the kernel running.
+If your operating system supports KVM, you can go ahead and run with KVM, which should make QEMU's emulation even faster:
+```
+make run-kvm
+```
+# Debugging
+You can also debug the kernel in VSCode by running `make debug` or `make debug-kvm`, switching to the `Run and Debug` section, and then running `kernel`:
+![Here's how you debug the kernel in Visual Studio Code!](.assets/screenshot0.png).
+If you just want to debug with GDB, run `make debug` or `make debug-kvm`, and run GDB. After starting GDB, run the following commands in GDB:
+```
+file kernel.elf
+target remote localhost:1234
+```
+# Screenshot(s)
+Here's what M/UX currently looks like when you run it:
+![Here's the latest screenshot!](.assets/screenshot1.png).
