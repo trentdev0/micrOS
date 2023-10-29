@@ -31,68 +31,12 @@ void interrupt_flush()
 	asm volatile ("lidt %0" :: "m"(descriptor) : "memory");
 }
 
-#if defined(THIRDPARTY)
-void interrupt0(frame_t * frame)
+void interrupt0(void * frame)
 {
 	(void)frame;
+
 	stream_printf(current_stream, "[EXCEPTION]:\033[15GDivision error occured!\r\n");
 
 	hang();
 }
-
-void interrupt2(frame_t * frame)
-{
-	(void)frame;
-	stream_printf(current_stream, "[EXCEPTION]:\033[15GNMI (Non Maskable Interrupt) occured!\r\n");
-
-	hang();
-}
-
-void interrupt4(frame_t * frame)
-{
-	(void)frame;
-	stream_printf(current_stream, "[EXCEPTION]:\033[15GOverflow occured!\r\n");
-
-	hang();
-}
-
-void interrupt5(frame_t * frame)
-{
-	(void)frame;
-	stream_printf(current_stream, "[EXCEPTION]:\033[15GUnauthorized access in memory!\r\n");
-
-	hang();
-}
-
-void interrupt6(frame_t * frame)
-{
-	(void)frame;
-	stream_printf(current_stream, "[EXCEPTION]:\033[15GInvalid opcode!\r\n");
-
-	hang();
-}
-
-void interrupt7(frame_t * frame)
-{
-	(void)frame;
-	stream_printf(current_stream, "[EXCEPTION]:\033[15GFPU (Floating-Point Unit) fault!\r\n");
-
-	hang();
-}
-
-void interrupt14(frame_t * frame)
-{
-	(void)frame;
-	stream_printf(current_stream, "[EXCEPTION]:\033[15GPage fault!\r\n");
-
-	hang();
-}
-
-void interrupt32(frame_t * frame)
-{
-	(void)frame;
-
-	stream_printf(current_stream, "[INTERRUPT]:\033[15GPIT interrupt triggered!\r\n");
-}
-#endif
 #endif

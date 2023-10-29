@@ -38,6 +38,14 @@ void _start()
 	 */
 	virtmem_init();
 
+	/* Add division error interrupt handler as an entry in the IDT. */
+	interrupt_register(0, &interrupt0, 0x8E);
+
+	/* Flush the IDT to the CPU. */
+	interrupt_flush();
+
+	acpi_init();
+
 	/*
 	 *	Printing `Hello, world!` allows us to see if the initialization of all other modules above
 	 *	succeeded or not.
