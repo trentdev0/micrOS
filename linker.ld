@@ -42,7 +42,7 @@ SECTIONS
 		*(COMMON)
 	} :data
 
-	kernel_end_addr = .;
+	kernel_end = .;
 
 	/DISCARD/ : {
 		*(.eh_frame)

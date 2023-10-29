@@ -12,6 +12,7 @@ M/UX is a work-in-progress UNIX-like kernel for amd64 processors, designed to ru
 - [X] Virtual memory management
 - [ ] Multitasking
 - [ ] Virtual filesystem
+- [ ] Print `Hello, world!` in userland
 ## Architectures
 - [X] amd64-pc
 ## Building

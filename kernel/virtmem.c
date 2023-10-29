@@ -6,7 +6,7 @@
 #include "stream.h"
 #include "thirdparty/limine.h"
 
-extern char kernel_end_addr[];
+extern char kernel_end[];
 
 volatile struct limine_hhdm_request hhdm_request = {
 	.id = LIMINE_HHDM_REQUEST,
@@ -37,7 +37,6 @@ uint64_t * virtmem_next(uint64_t * current, uint64_t index)
 	current[index] = next | PTE_PRESENT | PTE_WRITABLE | PTE_USER;
 	return (uint64_t *)(next + hhdm_request.response->offset);
 }
-
 
 void virtmem_unmap(pagemap_t * pagemap, uint64_t virtual_address)
 {
