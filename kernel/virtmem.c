@@ -4,6 +4,8 @@
 #include "physmem.h"
 #include "string.h"
 #include "stream.h"
+#include "process.h"
+#include "main.h"
 #include "thirdparty/limine.h"
 
 extern char kernel_end[];
@@ -17,8 +19,6 @@ volatile struct limine_kernel_address_request kernel_address_request = {
 	.id = LIMINE_KERNEL_ADDRESS_REQUEST,
 	.revision = 0
 };
-
-pagemap_t kernel_pagemap;
 
 uint64_t * virtmem_next(uint64_t * current, uint64_t index)
 {
@@ -73,9 +73,9 @@ void virtmem_init()
 	stream_printf(current_stream, "[VIRTMEM]:\033[15GHere's the start of our kernel in virtual memory (address=\"0x%lx\")!\r\n", kernel_address_request.response->virtual_base);
 	stream_printf(current_stream, "[VIRTMEM]:\033[15GHere's the HHDM offset (address=\"0x%lx\")!\r\n", hhdm_request.response->offset);
 
-	kernel_pagemap.start = (uint64_t *)physmem_zalloc();
+	process.pagemap.start = (uint64_t *)physmem_zalloc();
 
-	kernel_pagemap.start = (void *)kernel_pagemap.start + hhdm_request.response->offset;
+	process.pagemap.start = (void *)process.pagemap.start + hhdm_request.response->offset;
 
 	uint64_t virtual = kernel_address_request.response->virtual_base;
 	uint64_t physical = kernel_address_request.response->physical_base;
@@ -83,16 +83,16 @@ void virtmem_init()
 
 	for(uint64_t i = 0; i < length; i += PAGE_SIZE)
 	{
-		virtmem_map(&kernel_pagemap, physical + i, virtual + i, PTE_PRESENT | PTE_WRITABLE);
+		virtmem_map(&process.pagemap, physical + i, virtual + i, PTE_PRESENT | PTE_WRITABLE);
 	}
 
 	for(uint64_t i = PAGE_SIZE; i < 0x100000000; i += PAGE_SIZE)
 	{
-		virtmem_map(&kernel_pagemap, i, i, PTE_PRESENT | PTE_WRITABLE);
-		virtmem_map(&kernel_pagemap, i, i + hhdm_request.response->offset, PTE_PRESENT | PTE_WRITABLE);
+		virtmem_map(&process.pagemap, i, i, PTE_PRESENT | PTE_WRITABLE);
+		virtmem_map(&process.pagemap, i, i + hhdm_request.response->offset, PTE_PRESENT | PTE_WRITABLE);
 	}
 
-	virtmem_switch(&kernel_pagemap);
+	virtmem_switch(&process.pagemap);
 
 	stream_printf(current_stream, "[VIRTMEM]:\033[15GSuccessfully initialized virtual memory manager!\r\n");
 }

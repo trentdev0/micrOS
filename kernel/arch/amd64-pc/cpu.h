@@ -2,21 +2,25 @@
 
 #include <stdint.h>
 
+/* Disable interrupts. */
 static inline void cli()
 {
 	asm("cli");
 }
 
+/* Enable interrupts. */
 static inline void sti()
 {
 	asm("sti");
 }
 
+/* Halt the current CPU. */
 static inline void hlt()
 {
 	asm("hlt");
 }
 
+/* Hang a CPU. */
 static inline void hang()
 {
 	cli();

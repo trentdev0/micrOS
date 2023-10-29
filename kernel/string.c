@@ -65,6 +65,7 @@ int memcmp(const void *s1, const void *s2, size_t n)
 	return 0;
 }
 
+/* Return the length of a string... */
 unsigned int strlen(const char * s)
 {
 	unsigned int count = 0;
@@ -74,4 +75,12 @@ unsigned int strlen(const char * s)
 		s++;
 	}
 	return count;
+}
+
+/* Copy a string from one place to another. */
+char * strcpy(char * destination, const char * source)
+{
+	char * temporary = destination;
+	while((*destination++ = *source++));
+	return temporary;
 }

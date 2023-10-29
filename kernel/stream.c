@@ -10,6 +10,11 @@
 stream_t streams[8];
 stream_t * current_stream;
 
+/*
+ *	If we're compiling M/UX with third-party features enabled, we will have a framebuffer
+ *	terminal, which is provided by flanterm. If we don't have flanterm, all communications
+ *	will happen in the COM1 serial port.
+ */
 #if defined(THIRDPARTY)
 struct flanterm_context * flanterm;
 
@@ -64,7 +69,18 @@ void stream_init()
 #endif
 }
 
-int stream_printf(stream_t *stream, const char *format, ...)
+/*
+ *	A nice print function that allows us to print to a stream with format specifiers. Similar to
+ *	the `printf` function in userland programming.
+ *	Here are the possible format specifiers:
+ *	%c	Allows us to print a single character
+ *	%s	Allows us to print a string
+ *	%d	Allows us to print a signed integer, can be a int8_t, int16_t, int32_t, or int.
+ *	%u	Allows us to print an unsigned integer, can be an uint8_t, uint16_t, uint32_t, or unsigned int.
+ *	%x	Allows us to print an unsigned integer in hexadecimal form, can be uint8_t, uint16_t, uint32_t, or unsigned int.
+ *	You can also use these format specifiers, but with an l before the format specifier character to print 64-bit numbers.
+ */
+int stream_printf(stream_t * stream, const char * format, ...)
 {
 	va_list args;
 	va_start(args, format);

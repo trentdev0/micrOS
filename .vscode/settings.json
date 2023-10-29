@@ -33,6 +33,8 @@
 		"memory": "c",
 		"new": "c",
 		"functional": "c",
-		"physmem.h": "c"
+		"physmem.h": "c",
+		"stddef.h": "c",
+		"memory.h": "c"
 	}
 }

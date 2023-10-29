@@ -110,6 +110,7 @@ uint64_t physmem_find_free(uint64_t index)
 	return 0xFFFFFFFFFFFFFFFF;
 }
 
+/* Allocate a 4KiB page. */
 uint64_t physmem_alloc()
 {
 	for(uint64_t i = 0; i < regions_size; i++)
@@ -126,6 +127,7 @@ uint64_t physmem_alloc()
 	return 0xFFFFFFFFFFFFFFFF;
 }
 
+/* Free a 4KiB page. */
 int physmem_free(uint64_t address)
 {
 	uint64_t index0 = physmem_getregion(address);

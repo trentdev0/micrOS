@@ -9,36 +9,41 @@
 #include "interrupt.h"
 #include "physmem.h"
 #include "virtmem.h"
+#include "process.h"
+
+/* This is the kernel's represented as a process. */
+process_t process;
 
 void _start()
 {
+	/*
+	 *	Initializing the stream module (stream.c & stream.h) allows us to communicate through
+	 *	terminals, such as the framebuffer terminal, which sits on the first screen, and allows
+	 *	us to communicate through serial ports COM1, COM2, COM3, COM4, COM5, COM6, COM7 and COM8.
+	 */
 	stream_init();
 
+	/*
+	 *	Initializing the physmem module (physmem.c & physmem.h) allows us to obtain available
+	 *	free memory, and also allows us to allocate and free 4KiB pages.
+	 */
 	physmem_init();
+
+	/*
+	 *	Initializing our virtual memory manager will set up the kernel process's pagemap, however
+	 *	when we implement code for managing multitasking, it will manage the other parts of the
+	 *	kernel's process object.
+	 *	Besides that, here we re-initialize virtual memory (since limine kind of does it already for us).
+	 *	The virtmem module (virtmem.c & virtmem.h) allows us to map pages, which is very useful.
+	 */
 	virtmem_init();
 
+	/*
+	 *	Printing `Hello, world!` allows us to see if the initialization of all other modules above
+	 *	succeeded or not.
+	 */
 	stream_printf(current_stream, "Hello, world!\r\n");
 
-	interrupt_wipe();
-	interrupt_flush();
-
-	uint64_t pointer0 = physmem_alloc();
-	uint64_t pointer1 = physmem_alloc();
-	uint64_t pointer2 = physmem_alloc();
-	stream_printf(current_stream, "Allocating a page!\r\nHere's the address: 0x%lx!\r\n", pointer0);
-	stream_printf(current_stream, "Allocating a page!\r\nHere's the address: 0x%lx!\r\n", pointer1);
-	stream_printf(current_stream, "Allocating a page!\r\nHere's the address: 0x%lx!\r\n", pointer2);
-
-	stream_printf(current_stream, "Freeing a page!\r\n");
-	physmem_free(pointer0);
-	stream_printf(current_stream, "Freeing a page!\r\n");
-	physmem_free(pointer1);
-	stream_printf(current_stream, "Freeing a page!\r\n");
-	physmem_free(pointer2);
-
-	uint64_t pointer3 = physmem_alloc();
-	stream_printf(current_stream, "Allocating a page again!\r\nHere's the address: 0x%lx!\r\n", pointer3);
-	physmem_free(pointer3);
-
+	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
 	hang();
 }
