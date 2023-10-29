@@ -8,19 +8,20 @@
 
 volatile struct limine_memmap_request memmap_request = {
 	.id = LIMINE_MEMMAP_REQUEST,
-	.revision = 0};
+	.revision = 0
+};
 
 region_t regions[32];
 size_t regions_size = 0;
 
 void physmem_init()
 {
-	struct limine_memmap_response *memmap = memmap_request.response;
-	struct limine_memmap_entry **entries = memmap->entries;
+	struct limine_memmap_response * memmap = memmap_request.response;
+	struct limine_memmap_entry ** entries = memmap->entries;
 
 	for (uint64_t i = 0; i < memmap->entry_count; i++)
 	{
-		struct limine_memmap_entry *entry = entries[i];
+		struct limine_memmap_entry * entry = entries[i];
 
 		stream_printf(current_stream, "[MEMMAP]:\033[15GFound a memmap entry (base=\"0x%lx\", length=\"0x%lx\", type=\"%ld\")!\r\n", entry->base, entry->length, entry->type);
 

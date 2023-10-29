@@ -4,6 +4,8 @@ OBJCOPY := x86_64-elf-objcopy
 CFLAGS := -g -pipe -Wall -Wextra -std=gnu11 -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pie -fno-pic -m64 -march=x86-64 -mabi=sysv -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -I. -MMD
 LDFLAGS := -Tlinker.ld -ffreestanding -nostdlib
 
+QEMUFLAGS := -cdrom image.iso
+
 KERNEL := kernel
 SRC_C_FILES := $(wildcard $(KERNEL)/*.c)
 SRC_S_FILES := $(wildcard $(KERNEL)/*.S)
@@ -71,13 +73,16 @@ limine:
 	make -C limine
 
 run:
-	qemu-system-x86_64 -cdrom image.iso
+	qemu-system-x86_64 $(QEMUFLAGS)
+
+run-kvm:
+	qemu-system-x86_64 $(QEMUFLAGS) --enable-kvm
 
 debug:
-	qemu-system-x86_64 -s -S -cdrom image.iso
+	qemu-system-x86_64 -s -S $(QEMUFLAGS)
 
-run-serial:
-	xterm -hold -e "qemu-system-x86_64 -nographic -serial mon:stdio -cdrom image.iso"
+debug-kvm:
+	qemu-system-x86_64 -s -S $(QEMUFLAGS)
 
 clean:
 	rm -f kernel/*.o kernel/*.d kernel/arch/amd64-pc/*.o kernel/arch/amd64-pc/*.d kernel/thirdparty/*.o kernel/thirdparty/*.d kernel.elf image.iso
