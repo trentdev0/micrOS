@@ -23,6 +23,8 @@
 		"pic.h": "c",
 		"interrupt.h": "c",
 		"cpu.h": "c",
-		"limits.h": "c"
+		"limits.h": "c",
+		"random": "c",
+		"virtmem.h": "c"
 	}
 }

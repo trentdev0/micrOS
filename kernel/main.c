@@ -20,10 +20,7 @@ void _start()
 
 	stream_printf(current_stream, "Hello, world!\r\n");
 
-	for(int i = 0; i < 4096; i++)
-	{
-		stream_printf(current_stream, "Allocated a new page: 0x%lx!\r\n", physmem_alloc());
-	}
+	virtmem_init();
 
 	uint64_t pointer0 = physmem_alloc();
 	uint64_t pointer1 = physmem_alloc();
