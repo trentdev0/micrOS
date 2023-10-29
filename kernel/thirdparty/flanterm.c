@@ -412,7 +412,7 @@ static void dec_private_parse(struct flanterm_context *ctx, uint8_t c) {
     }
 
     if (ctx->callback != NULL) {
-        ctx->callback(ctx, FLANTERM_CB_DEC, ctx->esc_values_i, (uintptr_t)ctx->esc_values, c);
+        ctx->callback(ctx, FLANTERM_CB_DEC, ctx->esc_values_i, (uint64_t)ctx->esc_values, c);
     }
 }
 
@@ -422,7 +422,7 @@ static void linux_private_parse(struct flanterm_context *ctx) {
     }
 
     if (ctx->callback != NULL) {
-        ctx->callback(ctx, FLANTERM_CB_LINUX, ctx->esc_values_i, (uintptr_t)ctx->esc_values, 0);
+        ctx->callback(ctx, FLANTERM_CB_LINUX, ctx->esc_values_i, (uint64_t)ctx->esc_values, 0);
     }
 }
 
@@ -448,7 +448,7 @@ static void mode_toggle(struct flanterm_context *ctx, uint8_t c) {
     }
 
     if (ctx->callback != NULL) {
-        ctx->callback(ctx, FLANTERM_CB_MODE, ctx->esc_values_i, (uintptr_t)ctx->esc_values, c);
+        ctx->callback(ctx, FLANTERM_CB_MODE, ctx->esc_values_i, (uint64_t)ctx->esc_values, c);
     }
 }
 

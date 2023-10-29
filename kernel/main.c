@@ -8,19 +8,19 @@
 #include "stream.h"
 #include "interrupt.h"
 #include "physmem.h"
+#include "virtmem.h"
 
 void _start()
 {
 	stream_init();
 
 	physmem_init();
-
-	interrupt_wipe();
-	interrupt_flush();
+	virtmem_init();
 
 	stream_printf(current_stream, "Hello, world!\r\n");
 
-	virtmem_init();
+	interrupt_wipe();
+	interrupt_flush();
 
 	uint64_t pointer0 = physmem_alloc();
 	uint64_t pointer1 = physmem_alloc();

@@ -62,6 +62,8 @@ void physmem_init()
 	{
 		stream_printf(current_stream, "[PHYSMEM]:\033[15GHere's an chunk of free & usable memory (min=\"0x%lx\", max=\"0x%lx\", size=\"0x%lx\")!\r\n\033[15GWe also calculated some info about pages for you (min=\"0x%lx\", max=\"0x%lx\", size=\"0x%lx\")!\r\n\033[15GWe calculated info about the status region as well (size_bits=\"0x%lx\", size_bytes=\"0x%lx\", size_pages=\"0x%lx\")!\r\n", regions[i].memory_minimum, regions[i].memory_maximum, regions[i].memory_size, regions[i].pages_minumum, regions[i].pages_maximum, regions[i].pages_size, regions[i].status_bits_size, regions[i].status_bytes_size, regions[i].status_pages_size);
 	}
+
+	stream_printf(current_stream, "[PHYSMEM]:\033[15GSuccessfully initialized physical memory manager!\r\n");
 }
 
 /* Display the bitmap of a specific region by the region's index. */

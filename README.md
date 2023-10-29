@@ -4,12 +4,12 @@ M/UX is a work-in-progress UNIX-like kernel for amd64 processors, designed to ru
 ## Roadmap
 - [ ] GDT (Global Descriptor Table)
 - [X] IDT (Interrupt Descriptor Table)
-- [X] Exceptions
+- [ ] Exceptions
 - [X] Serial
 - [X] ACPI
 - [ ] Timer interrupt
 - [X] Physical memory management
-- [ ] Virtual memory management
+- [X] Virtual memory management
 - [ ] Multitasking
 - [ ] Virtual filesystem
 ## Architectures

@@ -4,15 +4,11 @@
 #include "../../thirdparty/limine.h"
 #include "../../stream.h"
 #include "../../string.h"
+#include "../../virtmem.h"
 #include "cpu.h"
 
 static volatile struct limine_rsdp_request rsdp_request = {
 	.id = LIMINE_RSDP_REQUEST,
-	.revision = 0
-};
-
-volatile struct limine_hhdm_request hhdm_request = {
-	.id = LIMINE_HHDM_REQUEST,
 	.revision = 0
 };
 

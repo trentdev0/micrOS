@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "string.h"
+
 #define PAGE_SIZE 4096
 
 typedef struct
@@ -134,3 +136,10 @@ void physmem_printpages(uint64_t index);
 uint64_t physmem_find_free(uint64_t index);
 uint64_t physmem_alloc();
 int physmem_free(uint64_t address);
+
+static inline uint64_t physmem_zalloc()
+{
+	uint64_t address = physmem_alloc();
+	memset((void *)address, 0, PAGE_SIZE);
+	return address;
+}

@@ -25,6 +25,14 @@
 		"cpu.h": "c",
 		"limits.h": "c",
 		"random": "c",
-		"virtmem.h": "c"
+		"virtmem.h": "c",
+		"bit": "c",
+		"cstddef": "c",
+		"string": "c",
+		"limits": "c",
+		"memory": "c",
+		"new": "c",
+		"functional": "c",
+		"physmem.h": "c"
 	}
 }
