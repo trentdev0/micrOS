@@ -38,11 +38,11 @@ You can also debug the kernel in VSCode by running `make debug` or `make debug-k
 
 ![Here's how you debug the kernel in Visual Studio Code!](.assets/screenshot0.png)
 
-If you just want to debug with GDB, run `make debug` or `make debug-kvm`, and run GDB. After starting GDB, run the following commands in GDB:
+If you just want to debug with GDB on the terminal without any GUI, run `make debug` or `make debug-kvm`, and run GDB. After starting GDB, run the following commands in GDB:
 ```
 file kernel.elf
 target remote localhost:1234
 ```
 # Screenshot(s)
 Here's what M/UX currently looks like when you run it:
-![Here's the latest screenshot!](.assets/screenshot1.png).
+![Here's the latest screenshot!](.assets/screenshot1.png)
