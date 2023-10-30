@@ -7,6 +7,7 @@
 #include "process.h"
 #include "main.h"
 #include "thirdparty/limine.h"
+#include "arch/amd64-pc/cpu.h"
 
 extern char kernel_end[];
 
@@ -18,6 +19,14 @@ volatile struct limine_hhdm_request hhdm_request = {
 volatile struct limine_kernel_address_request kernel_address_request = {
 	.id = LIMINE_KERNEL_ADDRESS_REQUEST,
 	.revision = 0
+};
+
+static volatile struct limine_paging_mode_request paging_mode_request = {
+	.id = LIMINE_PAGING_MODE_REQUEST,
+	.revision = 0,
+	.response = NULL,
+	.mode = LIMINE_PAGING_MODE_X86_64_5LVL,
+	.flags = 0
 };
 
 uint64_t * virtmem_next(uint64_t * current, uint64_t index)
@@ -40,10 +49,10 @@ uint64_t * virtmem_next(uint64_t * current, uint64_t index)
 
 void virtmem_unmap(pagemap_t * pagemap, uint64_t virtual_address)
 {
-	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FF << 39)) >> 39;
-	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FF << 30)) >> 30;
-	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FF << 21)) >> 21;
-	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FF << 12)) >> 12;
+	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFllu << 39)) >> 39;
+	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FFllu << 30)) >> 30;
+	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FFllu << 21)) >> 21;
+	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FFllu << 12)) >> 12;
 
 	uint64_t * pml3 = virtmem_next(pagemap->start, pml4_index);
 	uint64_t * pml2 = virtmem_next(pml3, pml3_index);
@@ -54,20 +63,81 @@ void virtmem_unmap(pagemap_t * pagemap, uint64_t virtual_address)
 	asm volatile("invlpg %0" : : "m"(*(char *)virtual_address) : "memory");
 }
 
-void virtmem_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags)
+int virtmem_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags)
 {
-	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FF << 39)) >> 39;
-	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FF << 30)) >> 30;
-	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FF << 21)) >> 21;
-	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FF << 12)) >> 12;
+	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFllu << 39)) >> 39;
+	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FFllu << 30)) >> 30;
+	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FFllu << 21)) >> 21;
+	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FFllu << 12)) >> 12;
 	uint64_t * pml3 = virtmem_next(pagemap->start, pml4_index);
 	uint64_t * pml2 = virtmem_next(pml3, pml3_index);
 	uint64_t * pml1 = virtmem_next(pml2, pml2_index);
 
+	if(pml3 == NULL)
+	{
+		return -1;
+	}
+
+	if(pml2 == NULL)
+	{
+		return -2;
+	}
+
+	if(pml1 == NULL)
+	{
+		return -3;
+	}
+
+	if((pml1[pml1_index] & PTE_PRESENT) != 0)
+	{
+		return -4;
+	}
+
 	pml1[pml1_index] = physical_address | flags;
+
+	return 0;
 }
 
-void virtmem_init()
+uint64_t * virtmem_virt2pte(pagemap_t * pagemap, uint64_t virt)
+{
+	uint64_t pml4_entry = (virt & (0x1FFllu << 39)) >> 39;
+	uint64_t pml3_entry = (virt & (0x1FFllu << 30)) >> 30;
+	uint64_t pml2_entry = (virt & (0x1FFllu << 21)) >> 21;
+	uint64_t pml1_entry = (virt & (0x1FFllu << 12)) >> 12;
+
+	uint64_t * pml3 = virtmem_next(pagemap->start, pml4_entry);
+	if(pml3 == NULL)
+	{
+		return NULL;
+	}
+
+	uint64_t * pml2 = virtmem_next(pml3, pml3_entry);
+	if(pml2 == NULL)
+	{
+		return NULL;
+	}
+
+	uint64_t * pml1 = virtmem_next(pml2, pml2_entry);
+	if(pml1 == NULL)
+	{
+		return NULL;
+	}
+
+	return &pml1[pml1_entry];
+}
+
+uint64_t virtmem_virt2phys(pagemap_t * pagemap, uint64_t virt)
+{
+	uint64_t * pte = virtmem_virt2pte(pagemap, virt);
+	if(pte == NULL || (((*pte) & ~PTE_ADDRESS_MASK) & PTE_PRESENT) == 0)
+	{
+		return 0xFFFFFFFFFFFFFFFF;
+	}
+
+	return ((*pte) & ~PTE_ADDRESS_MASK);
+}
+
+int virtmem_init()
 {
 	stream_printf(current_stream, "[VIRTMEM]:\033[15GHere's the start of our kernel in physical memory (address=\"0x%lx\")!\r\n", kernel_address_request.response->physical_base);
 	stream_printf(current_stream, "[VIRTMEM]:\033[15GHere's the start of our kernel in virtual memory (address=\"0x%lx\")!\r\n", kernel_address_request.response->virtual_base);
@@ -83,16 +153,31 @@ void virtmem_init()
 
 	for(uint64_t i = 0; i < length; i += PAGE_SIZE)
 	{
-		virtmem_map(&process.pagemap, physical + i, virtual + i, PTE_PRESENT | PTE_WRITABLE);
+		if(virtmem_map(&process.pagemap, physical + i, virtual + i, PTE_PRESENT | PTE_WRITABLE) != 0)
+		{
+			stream_printf(current_stream, "[VIRTMEM]:\033[15GFailed to successfully map a page!\r\n");
+			return -1;
+		}
 	}
 
 	for(uint64_t i = PAGE_SIZE; i < 0x100000000; i += PAGE_SIZE)
 	{
-		virtmem_map(&process.pagemap, i, i, PTE_PRESENT | PTE_WRITABLE);
-		virtmem_map(&process.pagemap, i, i + hhdm_request.response->offset, PTE_PRESENT | PTE_WRITABLE);
+		if(virtmem_map(&process.pagemap, i, i, PTE_PRESENT | PTE_WRITABLE))
+		{
+			stream_printf(current_stream, "[VIRTMEM]:\033[15GFailed to successfully map a page!\r\n");
+			return -2;
+		}
+
+		if(virtmem_map(&process.pagemap, i, i + hhdm_request.response->offset, PTE_PRESENT | PTE_WRITABLE))
+		{
+			stream_printf(current_stream, "[VIRTMEM]:\033[15GFailed to successfully map a page!\r\n");
+			return -3;
+		}
 	}
 
 	virtmem_switch(&process.pagemap);
 
 	stream_printf(current_stream, "[VIRTMEM]:\033[15GSuccessfully initialized virtual memory manager!\r\n");
+
+	return 0;
 }

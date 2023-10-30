@@ -3,7 +3,6 @@
 
 #include "thirdparty/limine.h"
 #include "arch/amd64-pc/cpu.h"
-#include "arch/amd64-pc/acpi.h"
 #include "serial.h"
 #include "stream.h"
 #include "interrupt.h"
@@ -43,8 +42,6 @@ void _start()
 
 	/* Flush the IDT to the CPU. */
 	interrupt_flush();
-
-	acpi_init();
 
 	/*
 	 *	Printing `Hello, world!` allows us to see if the initialization of all other modules above

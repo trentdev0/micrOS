@@ -35,6 +35,8 @@
 		"functional": "c",
 		"physmem.h": "c",
 		"stddef.h": "c",
-		"memory.h": "c"
+		"memory.h": "c",
+		"slab.h": "c",
+		"memory_resource": "c"
 	}
 }
