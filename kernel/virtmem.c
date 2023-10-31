@@ -98,45 +98,6 @@ int virtmem_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual
 	return 0;
 }
 
-uint64_t * virtmem_virt2pte(pagemap_t * pagemap, uint64_t virt)
-{
-	uint64_t pml4_entry = (virt & (0x1FFllu << 39)) >> 39;
-	uint64_t pml3_entry = (virt & (0x1FFllu << 30)) >> 30;
-	uint64_t pml2_entry = (virt & (0x1FFllu << 21)) >> 21;
-	uint64_t pml1_entry = (virt & (0x1FFllu << 12)) >> 12;
-
-	uint64_t * pml3 = virtmem_next(pagemap->start, pml4_entry);
-	if(pml3 == NULL)
-	{
-		return NULL;
-	}
-
-	uint64_t * pml2 = virtmem_next(pml3, pml3_entry);
-	if(pml2 == NULL)
-	{
-		return NULL;
-	}
-
-	uint64_t * pml1 = virtmem_next(pml2, pml2_entry);
-	if(pml1 == NULL)
-	{
-		return NULL;
-	}
-
-	return &pml1[pml1_entry];
-}
-
-uint64_t virtmem_virt2phys(pagemap_t * pagemap, uint64_t virt)
-{
-	uint64_t * pte = virtmem_virt2pte(pagemap, virt);
-	if(pte == NULL || (((*pte) & ~PTE_ADDRESS_MASK) & PTE_PRESENT) == 0)
-	{
-		return 0xFFFFFFFFFFFFFFFF;
-	}
-
-	return ((*pte) & ~PTE_ADDRESS_MASK);
-}
-
 int virtmem_init()
 {
 	stream_printf(current_stream, "[VIRTMEM]:\033[15GHere's the start of our kernel in physical memory (address=\"0x%lx\")!\r\n", kernel_address_request.response->physical_base);

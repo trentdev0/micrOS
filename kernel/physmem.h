@@ -130,7 +130,7 @@ static inline uint64_t physmem_byte2page(uint64_t bytes)
 	return return_value;
 }
 
-void physmem_init();
+int physmem_init();
 void physmem_printbitmap(uint64_t index);
 void physmem_printpages(uint64_t index);
 uint64_t physmem_find_free(uint64_t index);

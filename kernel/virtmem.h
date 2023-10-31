@@ -17,7 +17,6 @@ enum
 typedef struct { uint64_t * start; } pagemap_t;
 
 extern volatile struct limine_hhdm_request hhdm_request;
-extern volatile struct limine_hhdm_request hhdm_request;
 
 uint64_t virtmem_virt2phys(pagemap_t * pagemap, uint64_t virt);
 uint64_t * virtmem_virt2pte(pagemap_t * pagemap, uint64_t virt);

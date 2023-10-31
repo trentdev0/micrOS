@@ -11,7 +11,7 @@ typedef struct
 extern stream_t streams[8];
 extern stream_t * current_stream;
 
-void stream_init();
+int stream_init();
 
 static inline void stream_putc(stream_t * stream, char character)
 {

@@ -20,13 +20,13 @@ void _start()
 	 *	terminals, such as the framebuffer terminal, which sits on the first screen, and allows
 	 *	us to communicate through serial ports COM1, COM2, COM3, COM4, COM5, COM6, COM7 and COM8.
 	 */
-	stream_init();
+	if(stream_init() != 0) { hang(); }
 
 	/*
 	 *	Initializing the physmem module (physmem.c & physmem.h) allows us to obtain available
 	 *	free memory, and also allows us to allocate and free 4KiB pages.
 	 */
-	physmem_init();
+	if(physmem_init() != 0) { hang(); }
 
 	/*
 	 *	Initializing our virtual memory manager will set up the kernel process's pagemap, however
@@ -35,13 +35,13 @@ void _start()
 	 *	Besides that, here we re-initialize virtual memory (since limine kind of does it already for us).
 	 *	The virtmem module (virtmem.c & virtmem.h) allows us to map pages, which is very useful.
 	 */
-	virtmem_init();
+	if(virtmem_init() != 0) { hang(); }
+
+	/* Tell the CPU where our new IDT (Interrupt Descriptor Table) is at... */
+	interrupt_flush();
 
 	/* Add division error interrupt handler as an entry in the IDT. */
 	interrupt_register(0, &interrupt0, 0x8E);
-
-	/* Flush the IDT to the CPU. */
-	interrupt_flush();
 
 	/*
 	 *	Printing `Hello, world!` allows us to see if the initialization of all other modules above

@@ -14,7 +14,7 @@ volatile struct limine_memmap_request memmap_request = {
 region_t regions[32];
 size_t regions_size = 0;
 
-void physmem_init()
+int physmem_init()
 {
 	struct limine_memmap_response * memmap = memmap_request.response;
 	struct limine_memmap_entry ** entries = memmap->entries;
@@ -64,6 +64,8 @@ void physmem_init()
 	}
 
 	stream_printf(current_stream, "[PHYSMEM]:\033[15GSuccessfully initialized physical memory manager!\r\n");
+
+	return -1;
 }
 
 /* Display the bitmap of a specific region by the region's index. */

@@ -29,7 +29,7 @@ void flanterm_putc(char character)
 }
 #endif
 
-void stream_init()
+int stream_init()
 {
 #if defined(THIRDPARTY)
 	flanterm = flanterm_fb_simple_init(framebuffer_request.response->framebuffers[0]->address, framebuffer_request.response->framebuffers[0]->width, framebuffer_request.response->framebuffers[0]->height, framebuffer_request.response->framebuffers[0]->pitch);
@@ -67,6 +67,8 @@ void stream_init()
 #else
 	current_stream = &streams[0];
 #endif
+
+	return 0;
 }
 
 /*
