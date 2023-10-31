@@ -65,7 +65,7 @@ int physmem_init()
 
 	stream_printf(current_stream, "[PHYSMEM]:\033[15GSuccessfully initialized physical memory manager!\r\n");
 
-	return -1;
+	return 0;
 }
 
 /* Display the bitmap of a specific region by the region's index. */

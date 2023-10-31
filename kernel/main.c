@@ -13,6 +13,8 @@
 /* This is the kernel's represented as a process. */
 process_t process;
 
+extern char kernel_end[];
+
 void _start()
 {
 	/*
@@ -48,6 +50,12 @@ void _start()
 	 *	succeeded or not.
 	 */
 	stream_printf(current_stream, "Hello, world!\r\n");
+
+	char * pointer = (char *)physmem_alloc();
+	strcpy(pointer, "Hello, world!\r\n");
+	virtmem_map(&process.pagemap, pointer, virtmem_virt2phys(&process.pagemap, ((uint64_t)&kernel_end + 0x3000)), PTE_PRESENT | PTE_WRITABLE);
+
+	stream_printf(current_stream, virtmem_virt2phys(&process.pagemap, ((uint64_t)&kernel_end + 0x3000)));
 
 	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
 	hang();

@@ -29,6 +29,40 @@ static volatile struct limine_paging_mode_request paging_mode_request = {
 	.flags = 0
 };
 
+uint64_t * virtmem_virt2pte(pagemap_t * pagemap, uint64_t address)
+{
+	uint64_t pml4_index = (address & ((uint64_t)0x1FFLLU << 39)) >> 39;
+	uint64_t pml3_index = (address & ((uint64_t)0x1FFLLU << 30)) >> 30;
+	uint64_t pml2_index = (address & ((uint64_t)0x1FFLLU << 21)) >> 21;
+	uint64_t pml1_index = (address & ((uint64_t)0x1FFLLU << 12)) >> 12;
+
+	uint64_t *pml3 = virtmem_next(pagemap->start, pml4_index);
+	if(pml3 == NULL)
+	{
+		return NULL;
+	}
+
+	uint64_t *pml2 = virtmem_next(pml3, pml3_index);
+	if(pml2 == NULL)
+	{
+		return NULL;
+	}
+
+	uint64_t *pml1 = virtmem_next(pml2, pml2_index);
+	if(pml1 == NULL)
+	{
+		return NULL;
+	}
+
+	return &pml1[pml1_index];
+}
+
+uint64_t virtmem_virt2phys(pagemap_t * pagemap, uint64_t address)
+{
+    uint64_t * pte = virtmem_virt2pte(pagemap, address);
+    return *pte & PTE_ADDRESS_MASK;
+}
+
 uint64_t * virtmem_next(uint64_t * current, uint64_t index)
 {
 	if((current[index] & 1) != 0)
@@ -49,10 +83,10 @@ uint64_t * virtmem_next(uint64_t * current, uint64_t index)
 
 void virtmem_unmap(pagemap_t * pagemap, uint64_t virtual_address)
 {
-	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFllu << 39)) >> 39;
-	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FFllu << 30)) >> 30;
-	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FFllu << 21)) >> 21;
-	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FFllu << 12)) >> 12;
+	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFLLU << 39)) >> 39;
+	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FFLLU << 30)) >> 30;
+	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FFLLU << 21)) >> 21;
+	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FFLLU << 12)) >> 12;
 
 	uint64_t * pml3 = virtmem_next(pagemap->start, pml4_index);
 	uint64_t * pml2 = virtmem_next(pml3, pml3_index);
@@ -65,10 +99,10 @@ void virtmem_unmap(pagemap_t * pagemap, uint64_t virtual_address)
 
 int virtmem_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags)
 {
-	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFllu << 39)) >> 39;
-	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FFllu << 30)) >> 30;
-	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FFllu << 21)) >> 21;
-	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FFllu << 12)) >> 12;
+	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFLLU << 39)) >> 39;
+	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FFLLU << 30)) >> 30;
+	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FFLLU << 21)) >> 21;
+	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FFLLU << 12)) >> 12;
 	uint64_t * pml3 = virtmem_next(pagemap->start, pml4_index);
 	uint64_t * pml2 = virtmem_next(pml3, pml3_index);
 	uint64_t * pml1 = virtmem_next(pml2, pml2_index);

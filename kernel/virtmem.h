@@ -18,8 +18,8 @@ typedef struct { uint64_t * start; } pagemap_t;
 
 extern volatile struct limine_hhdm_request hhdm_request;
 
-uint64_t virtmem_virt2phys(pagemap_t * pagemap, uint64_t virt);
-uint64_t * virtmem_virt2pte(pagemap_t * pagemap, uint64_t virt);
+uint64_t * virtmem_virt2pte(pagemap_t * pagemap, uint64_t address);
+uint64_t virtmem_virt2phys(pagemap_t * pagemap, uint64_t address);
 int virtmem_init();
 uint64_t * virtmem_next(uint64_t * current, uint64_t index);
 int virtmem_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags);
