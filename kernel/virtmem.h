@@ -22,5 +22,11 @@ uint64_t * virtmem_virt2pte(pagemap_t * pagemap, uint64_t address);
 uint64_t virtmem_virt2phys(pagemap_t * pagemap, uint64_t address);
 int virtmem_init();
 uint64_t * virtmem_next(uint64_t * current, uint64_t index);
-int virtmem_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags);
+int virtmem_map0(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags);
+
+static inline int virtmem_map1(pagemap_t * pagemap, uint64_t from, uint64_t to, uint64_t flags)
+{
+	return virtmem_map0(pagemap, virtmem_virt2phys(&process.pagemap, from), to, flags);
+}
+
 void virtmem_unmap(pagemap_t * pagemap, uint64_t virtual_address);

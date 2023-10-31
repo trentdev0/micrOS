@@ -52,8 +52,8 @@ void _start()
 	stream_printf(current_stream, "Hello, world!\r\n");
 
 	char * pointer = (char *)physmem_alloc();
-	strcpy(pointer, "Hello, world!\r\n");
-	virtmem_map(&process.pagemap, pointer, virtmem_virt2phys(&process.pagemap, ((uint64_t)&kernel_end + 0x3000)), PTE_PRESENT | PTE_WRITABLE);
+	strcpy(pointer, "Hello, asdasdasd!\r\n");
+	virtmem_map0(&process.pagemap, pointer, virtmem_virt2phys(&process.pagemap, ((uint64_t)&kernel_end + 0x3000)), PTE_PRESENT | PTE_WRITABLE);
 
 	stream_printf(current_stream, virtmem_virt2phys(&process.pagemap, ((uint64_t)&kernel_end + 0x3000)));
 

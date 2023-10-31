@@ -97,7 +97,7 @@ void virtmem_unmap(pagemap_t * pagemap, uint64_t virtual_address)
 	asm volatile("invlpg %0" : : "m"(*(char *)virtual_address) : "memory");
 }
 
-int virtmem_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags)
+int virtmem_map0(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags)
 {
 	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFLLU << 39)) >> 39;
 	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FFLLU << 30)) >> 30;
@@ -148,7 +148,7 @@ int virtmem_init()
 
 	for(uint64_t i = 0; i < length; i += PAGE_SIZE)
 	{
-		if(virtmem_map(&process.pagemap, physical + i, virtual + i, PTE_PRESENT | PTE_WRITABLE) != 0)
+		if(virtmem_map0(&process.pagemap, physical + i, virtual + i, PTE_PRESENT | PTE_WRITABLE) != 0)
 		{
 			stream_printf(current_stream, "[VIRTMEM]:\033[15GFailed to successfully map a page!\r\n");
 			return -1;
@@ -157,13 +157,13 @@ int virtmem_init()
 
 	for(uint64_t i = PAGE_SIZE; i < 0x100000000; i += PAGE_SIZE)
 	{
-		if(virtmem_map(&process.pagemap, i, i, PTE_PRESENT | PTE_WRITABLE))
+		if(virtmem_map0(&process.pagemap, i, i, PTE_PRESENT | PTE_WRITABLE))
 		{
 			stream_printf(current_stream, "[VIRTMEM]:\033[15GFailed to successfully map a page!\r\n");
 			return -2;
 		}
 
-		if(virtmem_map(&process.pagemap, i, i + hhdm_request.response->offset, PTE_PRESENT | PTE_WRITABLE))
+		if(virtmem_map0(&process.pagemap, i, i + hhdm_request.response->offset, PTE_PRESENT | PTE_WRITABLE))
 		{
 			stream_printf(current_stream, "[VIRTMEM]:\033[15GFailed to successfully map a page!\r\n");
 			return -3;
