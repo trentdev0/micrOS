@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include "thirdparty/limine.h"
+#include "main.h"
 
 enum
 {
@@ -13,8 +14,6 @@ enum
 	PTE_USER = (1ull << 2ull),
 	PTE_NX = (1ull << 63ull)
 };
-
-typedef struct { uint64_t * start; } pagemap_t;
 
 extern volatile struct limine_hhdm_request hhdm_request;
 
@@ -26,7 +25,7 @@ int virtmem_map0(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtua
 
 static inline int virtmem_map1(pagemap_t * pagemap, uint64_t from, uint64_t to, uint64_t flags)
 {
-	return virtmem_map0(pagemap, virtmem_virt2phys(&process.pagemap, from), to, flags);
+	return virtmem_map0(pagemap, virtmem_virt2phys((pagemap_t *)&process.pagemap, from), to, flags);
 }
 
 void virtmem_unmap(pagemap_t * pagemap, uint64_t virtual_address);

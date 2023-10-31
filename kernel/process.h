@@ -1,6 +1,11 @@
 #pragma once
 
-#include "virtmem.h"
+#include <stdint.h>
+
+typedef struct
+{
+	uint64_t * start;
+} pagemap_t;
 
 typedef struct
 {

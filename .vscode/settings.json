@@ -37,6 +37,8 @@
 		"stddef.h": "c",
 		"memory.h": "c",
 		"slab.h": "c",
-		"memory_resource": "c"
+		"memory_resource": "c",
+		"main.h": "c",
+		"process.h": "c"
 	}
 }

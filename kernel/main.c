@@ -53,9 +53,9 @@ void _start()
 
 	char * pointer = (char *)physmem_alloc();
 	strcpy(pointer, "Hello, asdasdasd!\r\n");
-	virtmem_map0(&process.pagemap, pointer, virtmem_virt2phys(&process.pagemap, ((uint64_t)&kernel_end + 0x3000)), PTE_PRESENT | PTE_WRITABLE);
+	virtmem_map1(&process.pagemap, (uint64_t)pointer, (uint64_t)&kernel_end + 0x3000, PTE_PRESENT | PTE_WRITABLE);
 
-	stream_printf(current_stream, virtmem_virt2phys(&process.pagemap, ((uint64_t)&kernel_end + 0x3000)));
+	stream_printf(current_stream, (char *)virtmem_virt2phys(&process.pagemap, ((uint64_t)&kernel_end + 0x3000)));
 
 	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
 	hang();
