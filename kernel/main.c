@@ -6,12 +6,6 @@
 #include "serial.h"
 #include "stream.h"
 #include "interrupt.h"
-#include "physmem.h"
-#include "virtmem.h"
-#include "process.h"
-
-/* This is the kernel's represented as a process. */
-process_t process;
 
 extern char kernel_end[];
 
@@ -25,19 +19,12 @@ void _start()
 	if(stream_init() != 0) { hang(); }
 
 	/*
-	 *	Initializing the physmem module (physmem.c & physmem.h) allows us to obtain available
-	 *	free memory, and also allows us to allocate and free 4KiB pages.
+	 *	We merged the physical memory & virtual memory modules into one, since we want the page
+	 *	frame allocator to be "more connected" to our virtual memory module, meaning that we
+	 *	just need to call a function for allocation and de-allocation, without worrying about
+	 *	conversion of physical address to virtual address after allocation.
 	 */
-	if(physmem_init() != 0) { hang(); }
-
-	/*
-	 *	Initializing our virtual memory manager will set up the kernel process's pagemap, however
-	 *	when we implement code for managing multitasking, it will manage the other parts of the
-	 *	kernel's process object.
-	 *	Besides that, here we re-initialize virtual memory (since limine kind of does it already for us).
-	 *	The virtmem module (virtmem.c & virtmem.h) allows us to map pages, which is very useful.
-	 */
-	if(virtmem_init() != 0) { hang(); }
+	if(memory_init() != 0) { hang(); }
 
 	/* Tell the CPU where our new IDT (Interrupt Descriptor Table) is at... */
 	interrupt_flush();
@@ -50,12 +37,6 @@ void _start()
 	 *	succeeded or not.
 	 */
 	stream_printf(current_stream, "Hello, world!\r\n");
-
-	char * pointer = (char *)physmem_alloc();
-	strcpy(pointer, "Hello, asdasdasd!\r\n");
-	virtmem_map1(&process.pagemap, (uint64_t)pointer, (uint64_t)&kernel_end + 0x3000, PTE_PRESENT | PTE_WRITABLE);
-
-	stream_printf(current_stream, (char *)virtmem_virt2phys(&process.pagemap, ((uint64_t)&kernel_end + 0x3000)));
 
 	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
 	hang();

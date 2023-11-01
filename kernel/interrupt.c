@@ -5,6 +5,7 @@
 #include "arch/amd64-pc/descriptor.h"
 #include "interrupt.h"
 #include "stream.h"
+#include "ansi.h"
 
 #if defined(__x86_64__)
 idt_t idt[256];
@@ -35,7 +36,7 @@ void interrupt0(void * frame)
 {
 	(void)frame;
 
-	stream_printf(current_stream, "[EXCEPTION]:\033[15GDivision error occured!\r\n");
+	stream_printf(current_stream, "[EXCEPTION]:" ALIGN "Division error occured!\r\n");
 
 	hang();
 }

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "../../virtmem.h"
+#include "../../memory.h"
 
 /* Disable interrupts. */
 static inline void cli()
