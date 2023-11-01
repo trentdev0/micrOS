@@ -33,9 +33,9 @@ static inline void hang()
 }
 
 /* Switch to a pagemap. Moved from virtmem.h to cpu.h! */
-static inline void virtmem_switch(pagemap_t *pagemap)
+static inline void memory_switch(uint64_t * pml4)
 {
-	asm volatile("mov %0, %%cr3" : : "r"((void *)pagemap->start - hhdm_request.response->offset) : "memory");
+	asm volatile("mov %0, %%cr3" : : "r"((void *)pml4 - hhdm_request.response->offset) : "memory");
 }
 
 static inline uint8_t inb(uint16_t port)

@@ -36,7 +36,7 @@ void interrupt0(void * frame)
 {
 	(void)frame;
 
-	stream_printf(current_stream, "[EXCEPTION]:" ALIGN "Division error occured!\r\n");
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Division error occured!\r\n");
 
 	hang();
 }
