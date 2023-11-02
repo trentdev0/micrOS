@@ -1,3 +1,5 @@
+<img align="left" width="80" height="80" src=".assets/logo1.png" alt="The M/UX logo!">
+
 # M/UX
 ## About
 M/UX is a work-in-progress UNIX-like kernel for amd64 processors, designed to run with the limine bootloader, a bootloader with a superior boot protocol.

@@ -39,22 +39,6 @@ void _start()
 	 */
 	stream_printf(current_stream, "Hello, world!\r\n");
 
-	uint64_t i0 = memory_allocate();
-	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", i0);
-
-	uint64_t i1 = memory_allocate();
-	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", i1);
-
-	strcpy((char *)i1, "Hello, world!");
-	stream_printf(current_stream, "Set the page's contents to (address=" BOLD_WHITE "\"%s\"" RESET ")!\r\n", i1);
-
-	memory_free(i1);
-	memory_free(i0);
-	stream_printf(current_stream, "Freed the two pages!\r\n");
-
-	uint64_t i2 = memory_allocate();
-	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", i2);
-
 	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
 	hang();
 }

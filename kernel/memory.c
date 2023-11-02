@@ -5,7 +5,9 @@
 #include "stream.h"
 #include "memory.h"
 #include "ansi.h"
+#include "string.h"
 #include "thirdparty/limine.h"
+#include "arch/amd64-pc/cpu.h"
 
 pagemap_t pagemap;
 
@@ -45,6 +47,7 @@ uint64_t * memory_next(uint64_t * current, uint64_t index)
 	}
 
 	uint64_t next = memory_allocate();
+	memset((void *)next, 0, PAGE_SIZE);
 
 	if(next == 0xFFFFFFFFFFFFFFFF)
 	{
@@ -149,8 +152,9 @@ int memory_init()
 	{
 		struct limine_memmap_entry * entry = entries[i];
 
+#if 0
 		stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Found a memmap entry (base=" BOLD_WHITE "0x%lx" RESET ", length=" BOLD_WHITE "0x%lx" RESET ", type=" BOLD_WHITE "%ld" RESET ")!\r\n", entry->base, entry->length, entry->type);
-
+#endif
 		switch (entry->type)
 		{
 		case LIMINE_MEMMAP_USABLE:
@@ -204,6 +208,37 @@ int memory_init()
 
 	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in virtual memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_minimum, kernel_maximum, kernel_size);
 	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in physical memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_physical_minimum, kernel_physical_maximum, kernel_physical_size);
+
+#if 0
+	pagemap.start = (uint64_t *)memory_allocate();
+	memset((uint64_t *)pagemap.start, 0, PAGE_SIZE);
+
+	for(uint64_t i = 0; i < ((((uint64_t)kernel_end + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE) - kernel_minimum; i += PAGE_SIZE)
+	{
+		if(memory_map(&pagemap, kernel_physical_minimum + i, kernel_minimum + i, PTE_PRESENT | PTE_WRITABLE) != 0)
+		{
+			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Failed to successfully map a page!\r\n");
+			return -1;
+		}
+	}
+
+	for(uint64_t i = PAGE_SIZE; i < 0x100000000; i += PAGE_SIZE)
+	{
+		if(memory_map(&pagemap, i, i, PTE_PRESENT | PTE_WRITABLE))
+		{
+			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Failed to successfully map a page!\r\n");
+			return -2;
+		}
+
+		if(memory_map(&pagemap, i, i + OFFSET, PTE_PRESENT | PTE_WRITABLE))
+		{
+			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Failed to successfully map a page!\r\n");
+			return -3;
+		}
+	}
+
+	memory_switch(&pagemap);
+#endif
 
 	return 0;
 }
