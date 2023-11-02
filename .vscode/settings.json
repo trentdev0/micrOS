@@ -49,6 +49,7 @@
 		"deque": "c",
 		"unordered_map": "c",
 		"vector": "c",
-		"iterator": "c"
+		"iterator": "c",
+		"ansi.h": "c"
 	}
 }
