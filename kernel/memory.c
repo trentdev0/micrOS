@@ -14,7 +14,7 @@ pagemap_t pagemap;
 region_t regions[128];
 uint64_t regions_size = 0;
 
-extern char kernel_end[];
+extern char __kernel_end[];
 
 volatile struct limine_memmap_request memmap_request = {
 	.id = LIMINE_MEMMAP_REQUEST,
@@ -199,8 +199,8 @@ int memory_init()
 	uint64_t kernel_physical_minimum, kernel_physical_maximum, kernel_physical_size;
 
 	kernel_minimum = kernel_address_request.response->virtual_base;
-	kernel_maximum = (uint64_t)&kernel_end;
-	kernel_size = (uint64_t)&kernel_end - kernel_address_request.response->virtual_base;
+	kernel_maximum = (uint64_t)&__kernel_end;
+	kernel_size = (uint64_t)&__kernel_end - kernel_address_request.response->virtual_base;
 
 	kernel_physical_minimum = kernel_address_request.response->physical_base;
 	kernel_physical_size = kernel_size;
@@ -209,11 +209,12 @@ int memory_init()
 	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in virtual memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_minimum, kernel_maximum, kernel_size);
 	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in physical memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_physical_minimum, kernel_physical_maximum, kernel_physical_size);
 
-#if 0
 	pagemap.start = (uint64_t *)memory_allocate();
 	memset((uint64_t *)pagemap.start, 0, PAGE_SIZE);
 
-	for(uint64_t i = 0; i < ((((uint64_t)kernel_end + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE) - kernel_minimum; i += PAGE_SIZE)
+
+#if 0
+	for(uint64_t i = 0; i < ((((uint64_t)__kernel_end + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE) - kernel_minimum; i += PAGE_SIZE)
 	{
 		if(memory_map(&pagemap, kernel_physical_minimum + i, kernel_minimum + i, PTE_PRESENT | PTE_WRITABLE) != 0)
 		{

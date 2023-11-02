@@ -23,14 +23,7 @@ static inline void hlt()
 }
 
 /* Hang a CPU. */
-static inline void hang()
-{
-	cli();
-	for(;;)
-	{
-		hlt();
-	}
-}
+void hang();
 
 /* Switch to a pagemap. */
 static inline void memory_switch(pagemap_t *pagemap)

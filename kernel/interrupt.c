@@ -40,4 +40,130 @@ void interrupt0(void * frame)
 
 	hang();
 }
+
+void interrupt2(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Non maskable interrupt.\r\n");
+
+	hang();
+}
+
+void interrupt4(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Overflow occured!\r\n");
+
+	hang();
+}
+
+void interrupt5(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Bound range exceeded!\r\n");
+
+	hang();
+}
+
+void interrupt6(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Invalid opcode!\r\n");
+
+	hang();
+}
+
+void interrupt7(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Device not available!\r\n");
+
+	hang();
+}
+
+void interrupt8(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Double fault!\r\n");
+
+	hang();
+}
+
+void interrupt10(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Invalid TSS (Task State Segment)!\r\n");
+
+	hang();
+}
+
+void interrupt11(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Segment not present!\r\n");
+
+	hang();
+}
+
+void interrupt12(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Invalid TSS (Task State Segment)!\r\n");
+
+	hang();
+}
+
+void interrupt13(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Segment not present!\r\n");
+
+	hang();
+}
+
+void interrupt15(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "General protection fault occured!\r\n");
+
+	hang();
+}
+
+void interrupt16(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Page fault occured!\r\n");
+
+	hang();
+}
+
+void interrupt18(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "FPU exception occured!\r\n");
+
+	hang();
+}
+
+void interrupt21(void * frame)
+{
+	(void)frame;
+
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "SIMD exception occured!\r\n");
+
+	hang();
+}
 #endif

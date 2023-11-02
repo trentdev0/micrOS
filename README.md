@@ -1,4 +1,4 @@
-<img align="left" width="80" height="80" src=".assets/logo1.png" alt="The M/UX logo!">
+<img align="left" width="70" height="70" src=".assets/logo1.png" alt="The M/UX logo!">
 
 # M/UX
 ## About

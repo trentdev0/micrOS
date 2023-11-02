@@ -27,4 +27,18 @@ static inline void interrupt_wipe()
 }
 
 void __attribute__((interrupt)) interrupt0(void * frame);
+void __attribute__((interrupt)) interrupt2(void * frame);
+void __attribute__((interrupt)) interrupt4(void * frame);
+void __attribute__((interrupt)) interrupt5(void * frame);
+void __attribute__((interrupt)) interrupt6(void * frame);
+void __attribute__((interrupt)) interrupt7(void * frame);
+void __attribute__((interrupt)) interrupt8(void * frame);
+void __attribute__((interrupt)) interrupt10(void * frame);
+void __attribute__((interrupt)) interrupt11(void * frame);
+void __attribute__((interrupt)) interrupt12(void * frame);
+void __attribute__((interrupt)) interrupt13(void * frame);
+void __attribute__((interrupt)) interrupt15(void * frame);
+void __attribute__((interrupt)) interrupt16(void * frame);
+void __attribute__((interrupt)) interrupt18(void * frame);
+void __attribute__((interrupt)) interrupt21(void * frame);
 #endif

@@ -8,7 +8,7 @@
 #include "interrupt.h"
 #include "ansi.h"
 
-extern char kernel_end[];
+extern char __kernel_end[];
 
 void _start()
 {
@@ -32,6 +32,20 @@ void _start()
 
 	/* Add division error interrupt handler as an entry in the IDT. */
 	interrupt_register(0, &interrupt0, 0x8E);
+	interrupt_register(0, &interrupt2, 0x8E);
+	interrupt_register(0, &interrupt4, 0x8E);
+	interrupt_register(0, &interrupt5, 0x8E);
+	interrupt_register(0, &interrupt6, 0x8E);
+	interrupt_register(0, &interrupt7, 0x8E);
+	interrupt_register(0, &interrupt8, 0x8E);
+	interrupt_register(0, &interrupt10, 0x8E);
+	interrupt_register(0, &interrupt11, 0x8E);
+	interrupt_register(0, &interrupt12, 0x8E);
+	interrupt_register(0, &interrupt13, 0x8E);
+	interrupt_register(0, &interrupt15, 0x8E);
+	interrupt_register(0, &interrupt16, 0x8E);
+	interrupt_register(0, &interrupt18, 0x8E);
+	interrupt_register(0, &interrupt21, 0x8E);	
 
 	/*
 	 *	Printing `Hello, world!` allows us to see if the initialization of all other modules above
