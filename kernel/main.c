@@ -30,7 +30,7 @@ void _start()
 	/* Tell the CPU where our new IDT (Interrupt Descriptor Table) is at... */
 	interrupt_flush();
 
-	/* Add division error interrupt handler as an entry in the IDT. */
+	/* Add exception handler entries to the IDT! */
 	interrupt_register(0, &interrupt0, 0x8E);
 	interrupt_register(0, &interrupt2, 0x8E);
 	interrupt_register(0, &interrupt4, 0x8E);
