@@ -49,7 +49,7 @@ void _start()
 	interrupt_register(15, &interrupt15, 0x8E);
 	interrupt_register(16, &interrupt16, 0x8E);
 	interrupt_register(18, &interrupt18, 0x8E);
-	interrupt_register(21, &interrupt21, 0x8E);	
+	interrupt_register(21, &interrupt21, 0x8E);
 
 	/*
 	 *	Printing `Hello, world!` allows us to see if the initialization of all other modules above
@@ -58,5 +58,6 @@ void _start()
 	stream_printf(current_stream, "Hello, world!\r\n");
 
 	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
+	
 	hang();
 }

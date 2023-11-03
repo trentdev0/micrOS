@@ -59,6 +59,8 @@ extern volatile struct limine_hhdm_request hhdm_request;
 
 #define PAGE_SIZE 4096
 
+#define PAGE_ALIGN(VALUE) (VALUE / PAGE_SIZE) * PAGE_SIZE
+
 /* Set the state of a bit in memory. */
 static inline void memory_setbit(uint8_t * array, uint64_t index, bool value)
 {

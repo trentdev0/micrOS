@@ -14,6 +14,12 @@ pagemap_t pagemap;
 region_t regions[128];
 uint64_t regions_size = 0;
 
+extern char __text_start[];
+extern char __text_end[];
+extern char __rodata_start[];
+extern char __rodata_end[];
+extern char __data_start[];
+extern char __data_end[];
 extern char __kernel_end[];
 
 volatile struct limine_memmap_request memmap_request = {
@@ -43,6 +49,56 @@ uint64_t * memory_next(uint64_t * current, uint64_t index)
 {
 	if((current[index] & 1) != 0)
 	{
+		return (uint64_t *)((current[index] & PTE_ADDRESS_MASK));
+	}
+
+	uint64_t next = memory_allocate();
+	memset((void *)next, 0, PAGE_SIZE);
+
+	if(next == 0xFFFFFFFFFFFFFFFF)
+	{
+		return NULL;
+	}
+
+	current[index] = (next - OFFSET) | PTE_PRESENT | PTE_WRITABLE | PTE_USER;
+	return (uint64_t *)(next);
+}
+
+
+void memory_unmap(pagemap_t * pagemap, uint64_t virtual_address)
+{
+	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FF << 39)) >> 39;
+	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FF << 30)) >> 30;
+	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FF << 21)) >> 21;
+	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FF << 12)) >> 12;
+
+	uint64_t * pml3 = memory_next(pagemap->start, pml4_index);
+	uint64_t * pml2 = memory_next(pml3, pml3_index);
+	uint64_t * pml1 = memory_next(pml2, pml2_index);
+
+	pml1[pml1_index] = 0;
+
+	asm volatile("invlpg %0" : : "m"(*(char *)virtual_address) : "memory");
+}
+
+void memory_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags)
+{
+	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FF << 39)) >> 39;
+	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FF << 30)) >> 30;
+	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FF << 21)) >> 21;
+	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FF << 12)) >> 12;
+	uint64_t * pml3 = memory_next(pagemap->start, pml4_index);
+	uint64_t * pml2 = memory_next(pml3, pml3_index);
+	uint64_t * pml1 = memory_next(pml2, pml2_index);
+
+	pml1[pml1_index] = physical_address | flags;
+}
+
+#if 0
+uint64_t * memory_next(uint64_t * current, uint64_t index)
+{
+	if((current[index] & 1) != 0)
+	{
 		return (uint64_t *)((current[index] & PTE_ADDRESS_MASK) + hhdm_request.response->offset);
 	}
 
@@ -55,8 +111,9 @@ uint64_t * memory_next(uint64_t * current, uint64_t index)
 	}
 
 	current[index] = next | PTE_PRESENT | PTE_WRITABLE | PTE_USER;
-	return (uint64_t *)(next + hhdm_request.response->offset);
+	return (uint64_t *)(next);
 }
+#endif
 
 uint64_t * memory_virt2pte(pagemap_t * pagemap, uint64_t address)
 {
@@ -92,6 +149,7 @@ uint64_t memory_virt2phys(pagemap_t * pagemap, uint64_t address)
 	return *pte & PTE_ADDRESS_MASK;
 }
 
+#if 0
 void memory_unmap(pagemap_t * pagemap, uint64_t virtual_address)
 {
 	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFLLU << 39)) >> 39;
@@ -142,6 +200,7 @@ int memory_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_
 
 	return 0;
 }
+#endif
 
 int memory_init()
 {
@@ -212,34 +271,33 @@ int memory_init()
 	pagemap.start = (uint64_t *)memory_allocate();
 	memset((uint64_t *)pagemap.start, 0, PAGE_SIZE);
 
+	uint64_t text_start = PAGE_ALIGN((uint64_t)&__text_start), rodata_start = PAGE_ALIGN((uint64_t)&__rodata_start), data_start = PAGE_ALIGN((uint64_t)&__data_start), text_end = PAGE_ALIGN((uint64_t)&__text_end), rodata_end = PAGE_ALIGN((uint64_t)&__rodata_end), data_end = PAGE_ALIGN((uint64_t)&__data_end);
 
-#if 0
-	for(uint64_t i = 0; i < ((((uint64_t)__kernel_end + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE) - kernel_minimum; i += PAGE_SIZE)
+	for(uint64_t text_address = text_start; text_address < text_end; text_address += PAGE_SIZE)
 	{
-		if(memory_map(&pagemap, kernel_physical_minimum + i, kernel_minimum + i, PTE_PRESENT | PTE_WRITABLE) != 0)
-		{
-			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Failed to successfully map a page!\r\n");
-			return -1;
-		}
+		uint64_t physical_address = text_address - kernel_minimum + kernel_physical_minimum;
+		memory_map(&pagemap, physical_address, text_address, PTE_PRESENT);
 	}
 
-	for(uint64_t i = PAGE_SIZE; i < 0x100000000; i += PAGE_SIZE)
+	for(uint64_t rodata_address = rodata_start; rodata_address < rodata_end; rodata_address += PAGE_SIZE)
 	{
-		if(memory_map(&pagemap, i, i, PTE_PRESENT | PTE_WRITABLE))
-		{
-			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Failed to successfully map a page!\r\n");
-			return -2;
-		}
+		uint64_t physical_address = rodata_address - kernel_minimum + kernel_physical_minimum;
+		memory_map(&pagemap, physical_address, rodata_address, PTE_PRESENT | PTE_NX);
+	}
 
-		if(memory_map(&pagemap, i, i + OFFSET, PTE_PRESENT | PTE_WRITABLE))
-		{
-			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Failed to successfully map a page!\r\n");
-			return -3;
-		}
+	for(uint64_t data_address = data_start; data_address < data_end; data_address += PAGE_SIZE)
+	{
+		uint64_t physical_address = data_address - kernel_minimum + kernel_physical_minimum;
+		memory_map(&pagemap, physical_address, data_address, PTE_PRESENT | PTE_WRITABLE | PTE_NX);
+	}
+
+	for(uint64_t address = 0x1000; address < 0x100000000; address += PAGE_SIZE)
+	{
+		memory_map(&pagemap, address, address, PTE_PRESENT | PTE_WRITABLE);
+		memory_map(&pagemap, address, address + OFFSET, PTE_PRESENT | PTE_WRITABLE | PTE_NX);
 	}
 
 	memory_switch(&pagemap);
-#endif
 
 	return 0;
 }
