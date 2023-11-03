@@ -36,20 +36,20 @@ void _start()
 
 	/* Add exception handler entries to the IDT! */
 	interrupt_register(0, &interrupt0, 0x8E);
-	interrupt_register(0, &interrupt2, 0x8E);
-	interrupt_register(0, &interrupt4, 0x8E);
-	interrupt_register(0, &interrupt5, 0x8E);
-	interrupt_register(0, &interrupt6, 0x8E);
-	interrupt_register(0, &interrupt7, 0x8E);
-	interrupt_register(0, &interrupt8, 0x8E);
-	interrupt_register(0, &interrupt10, 0x8E);
-	interrupt_register(0, &interrupt11, 0x8E);
-	interrupt_register(0, &interrupt12, 0x8E);
-	interrupt_register(0, &interrupt13, 0x8E);
-	interrupt_register(0, &interrupt15, 0x8E);
-	interrupt_register(0, &interrupt16, 0x8E);
-	interrupt_register(0, &interrupt18, 0x8E);
-	interrupt_register(0, &interrupt21, 0x8E);	
+	interrupt_register(2, &interrupt2, 0x8E);
+	interrupt_register(4, &interrupt4, 0x8E);
+	interrupt_register(5, &interrupt5, 0x8E);
+	interrupt_register(6, &interrupt6, 0x8E);
+	interrupt_register(7, &interrupt7, 0x8E);
+	interrupt_register(8, &interrupt8, 0x8E);
+	interrupt_register(10, &interrupt10, 0x8E);
+	interrupt_register(11, &interrupt11, 0x8E);
+	interrupt_register(12, &interrupt12, 0x8E);
+	interrupt_register(13, &interrupt13, 0x8E);
+	interrupt_register(15, &interrupt15, 0x8E);
+	interrupt_register(16, &interrupt16, 0x8E);
+	interrupt_register(18, &interrupt18, 0x8E);
+	interrupt_register(21, &interrupt21, 0x8E);	
 
 	/*
 	 *	Printing `Hello, world!` allows us to see if the initialization of all other modules above
