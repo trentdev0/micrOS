@@ -50,6 +50,7 @@
 		"unordered_map": "c",
 		"vector": "c",
 		"iterator": "c",
-		"ansi.h": "c"
+		"ansi.h": "c",
+		"gdt.h": "c"
 	}
 }

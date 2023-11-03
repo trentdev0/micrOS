@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "string.h"
+#include "../../string.h"
 
 typedef struct
 {
@@ -15,24 +15,22 @@ typedef struct
 	uint8_t base_high8;
 } gdt_t;
 
-typedef struct
+extern gdt_t gdt[11];
+
+static inline void gdt_register(int index, uint16_t limit, uint32_t base, uint8_t access, uint8_t granularity)
 {
-	uint16_t length;
-	uint16_t base_low16;
-	uint8_t base_mid8;
-	uint8_t flags0;
-	uint8_t flags1;
-	uint8_t base_high8;
-	uint32_t base_upper32;
-	uint32_t reserved;
-} tss_t;
-
-/* The package containing the GDT entries and the TSS. */
-struct _entries {gdt_t null0; gdt_t kernel16code; gdt_t kernel16data; gdt_t kernel32code; gdt_t kernel32data; gdt_t kernel64code; gdt_t kernel64data; gdt_t null1; gdt_t null2; tss_t tss};
-
-extern struct _entries entries;
+	gdt[index].limit = limit;
+	gdt[index].base_low16 = (uint16_t)(base & 0xFFFF);
+	gdt[index].base_mid8 = (uint8_t)((base >> 16) & 0xFF);
+	gdt[index].access = access;
+	gdt[index].granularity = granularity;
+	gdt[index].base_high8 = (uint8_t)((base >> 24) & 0xFF);
+}
 
 static inline void gdt_wipe()
 {
-	memset(&entries, 0, sizeof(entries));
+	memset(&gdt, 0, sizeof(gdt));
 }
+
+int gdt_init();
+void gdt_flush();

@@ -7,11 +7,15 @@
 #include "stream.h"
 #include "interrupt.h"
 #include "ansi.h"
+#include "arch/amd64-pc/gdt.h"
 
 extern char __kernel_end[];
 
 void _start()
 {
+	/* Set up the GDT (Global Descriptor Table) structure & flush it down to the CPU. */
+	if(gdt_init() != 0) { hang(); }
+
 	/*
 	 *	Initializing the stream module (stream.c & stream.h) allows us to communicate through
 	 *	terminals, such as the framebuffer terminal, which sits on the first screen, and allows
