@@ -2,7 +2,7 @@ CC := x86_64-elf-gcc
 AS := x86_64-elf-as
 OBJCOPY := x86_64-elf-objcopy
 CFLAGS := -g -pipe -Wall -Wextra -std=gnu11 -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pie -fno-pic -m64 -march=x86-64 -mabi=sysv -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -I. -MMD
-LDFLAGS := -Tlinker.ld -ffreestanding -nostdlib
+LDFLAGS := -ffreestanding -nostdlib
 
 QEMUFLAGS := -cdrom image.iso
 
@@ -26,6 +26,7 @@ ifeq ($(3RDPARTY), true)
 endif
 
 ifeq ($(ARCH), amd64-pc)
+	LDFLAGS += -Tkernel/arch/amd64-pc/linker.ld
 	ARCH_C_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.c)
 	ARCH_S_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.S)
 	ARCH_OBJ_C_FILES := $(patsubst $(KERNEL)/arch/amd64-pc/%.c, $(KERNEL)/arch/amd64-pc/%.o, $(ARCH_C_FILES))
