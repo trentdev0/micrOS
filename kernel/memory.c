@@ -14,6 +14,10 @@ pagemap_t pagemap;
 region_t regions[128];
 uint64_t regions_size = 0;
 
+uint64_t kernel_minimum, kernel_maximum, kernel_size;
+uint64_t kernel_physical_minimum, kernel_physical_maximum, kernel_physical_size;
+uint64_t virtual_address_minimum, virtual_address_maximum, virtual_address_size;
+
 extern char __text_start[];
 extern char __text_end[];
 extern char __rodata_start[];
@@ -165,13 +169,20 @@ int memory_init()
 			 */
 			regions[regions_size].status_pages_size = memory_byte2page(regions[regions_size].status_bytes_size);
 
+			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of entry " BOLD_WHITE "%lu" RESET " of usable memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", regions_size + 1, regions[regions_size].memory_minimum, regions[regions_size].memory_maximum, regions[regions_size].memory_size);
+
 			regions_size++;
 			break;
 		}
 	}
 
-	uint64_t kernel_minimum, kernel_maximum, kernel_size;
-	uint64_t kernel_physical_minimum, kernel_physical_maximum, kernel_physical_size;
+	uint64_t installed_memory = 0;
+	for(uint64_t i = 0; i < regions_size; i++)
+	{
+		installed_memory += regions[i].memory_size;
+	}
+
+	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "In total, there are " BOLD_WHITE "%lu" RESET " bytes of usable memory.\r\n", installed_memory);
 
 	kernel_minimum = kernel_address_request.response->virtual_base;
 	kernel_maximum = (uint64_t)&__kernel_end;
@@ -181,6 +192,13 @@ int memory_init()
 	kernel_physical_size = kernel_size;
 	kernel_physical_maximum = kernel_physical_minimum + kernel_physical_size;
 
+	virtual_address_minimum = regions[regions_size - 1].memory_maximum;
+	virtual_address_maximum = kernel_minimum;
+	virtual_address_size = virtual_address_maximum - virtual_address_minimum;
+	virtual_address_size = PAGE_ALIGN(virtual_address_size);
+	virtual_address_maximum = virtual_address_size - virtual_address_minimum;
+
+	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of available virtual address space (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", virtual_address_minimum, virtual_address_maximum, virtual_address_size);
 	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in virtual memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_minimum, kernel_maximum, kernel_size);
 	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in physical memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_physical_minimum, kernel_physical_maximum, kernel_physical_size);
 

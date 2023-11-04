@@ -31,6 +31,8 @@ extern uint64_t regions_size;
 
 extern pagemap_t pagemap;
 
+extern uint64_t virtual_address_minimum, virtual_address_maximum, virtual_address_size;
+
 enum
 {
 	PTE_ADDRESS_MASK = 0x000FFFFFFFFFF000,
