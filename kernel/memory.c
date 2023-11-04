@@ -94,27 +94,6 @@ void memory_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual
 	pml1[pml1_index] = physical_address | flags;
 }
 
-#if 0
-uint64_t * memory_next(uint64_t * current, uint64_t index)
-{
-	if((current[index] & 1) != 0)
-	{
-		return (uint64_t *)((current[index] & PTE_ADDRESS_MASK) + hhdm_request.response->offset);
-	}
-
-	uint64_t next = memory_allocate();
-	memset((void *)next, 0, PAGE_SIZE);
-
-	if(next == 0xFFFFFFFFFFFFFFFF)
-	{
-		return NULL;
-	}
-
-	current[index] = next | PTE_PRESENT | PTE_WRITABLE | PTE_USER;
-	return (uint64_t *)(next);
-}
-#endif
-
 uint64_t * memory_virt2pte(pagemap_t * pagemap, uint64_t address)
 {
 	uint64_t pml4_index = (address & ((uint64_t)0x1FFLLU << 39)) >> 39;
@@ -149,59 +128,6 @@ uint64_t memory_virt2phys(pagemap_t * pagemap, uint64_t address)
 	return *pte & PTE_ADDRESS_MASK;
 }
 
-#if 0
-void memory_unmap(pagemap_t * pagemap, uint64_t virtual_address)
-{
-	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFLLU << 39)) >> 39;
-	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FFLLU << 30)) >> 30;
-	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FFLLU << 21)) >> 21;
-	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FFLLU << 12)) >> 12;
-
-	uint64_t * pml3 = memory_next(pagemap->start, pml4_index);
-	uint64_t * pml2 = memory_next(pml3, pml3_index);
-	uint64_t * pml1 = memory_next(pml2, pml2_index);
-
-	pml1[pml1_index] = 0;
-
-	asm volatile("invlpg %0" : : "m"(*(char *)virtual_address) : "memory");
-}
-
-int memory_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags)
-{
-	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FFLLU << 39)) >> 39;
-	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FFLLU << 30)) >> 30;
-	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FFLLU << 21)) >> 21;
-	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FFLLU << 12)) >> 12;
-	uint64_t * pml3 = memory_next(pagemap->start, pml4_index);
-	uint64_t * pml2 = memory_next(pml3, pml3_index);
-	uint64_t * pml1 = memory_next(pml2, pml2_index);
-
-	if(pml3 == NULL)
-	{
-		return -1;
-	}
-
-	if(pml2 == NULL)
-	{
-		return -2;
-	}
-
-	if(pml1 == NULL)
-	{
-		return -3;
-	}
-
-	if((pml1[pml1_index] & PTE_PRESENT) != 0)
-	{
-		return -4;
-	}
-
-	pml1[pml1_index] = physical_address | flags;
-
-	return 0;
-}
-#endif
-
 int memory_init()
 {
 	struct limine_memmap_response * memmap = memmap_request.response;
@@ -211,9 +137,6 @@ int memory_init()
 	{
 		struct limine_memmap_entry * entry = entries[i];
 
-#if 0
-		stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Found a memmap entry (base=" BOLD_WHITE "0x%lx" RESET ", length=" BOLD_WHITE "0x%lx" RESET ", type=" BOLD_WHITE "%ld" RESET ")!\r\n", entry->base, entry->length, entry->type);
-#endif
 		switch (entry->type)
 		{
 		case LIMINE_MEMMAP_USABLE:
@@ -245,13 +168,6 @@ int memory_init()
 			regions_size++;
 			break;
 		}
-
-#if 0
-		for (typeof(regions_size) i = 0; i < regions_size; i++)
-		{
-			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here's an chunk of free & usable memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n\033[15GWe also calculated some info about pages for you (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n\033[15GWe calculated info about the status region as well (size_bits=\"0x%lx\", size_bytes=\"0x%lx\", size_pages=\"0x%lx\")!\r\n", regions[i].memory_minimum, regions[i].memory_maximum, regions[i].memory_size, regions[i].pages_minumum, regions[i].pages_maximum, regions[i].pages_size, regions[i].status_bits_size, regions[i].status_bytes_size, regions[i].status_pages_size);
-		}
-#endif
 	}
 
 	uint64_t kernel_minimum, kernel_maximum, kernel_size;
@@ -271,24 +187,9 @@ int memory_init()
 	pagemap.start = (uint64_t *)memory_allocate();
 	memset((uint64_t *)pagemap.start, 0, PAGE_SIZE);
 
-	uint64_t text_start = PAGE_ALIGN((uint64_t)&__text_start), rodata_start = PAGE_ALIGN((uint64_t)&__rodata_start), data_start = PAGE_ALIGN((uint64_t)&__data_start), text_end = PAGE_ALIGN((uint64_t)&__text_end), rodata_end = PAGE_ALIGN((uint64_t)&__rodata_end), data_end = PAGE_ALIGN((uint64_t)&__data_end);
-
-	for(uint64_t text_address = text_start; text_address < text_end; text_address += PAGE_SIZE)
+	for(uint64_t i = 0; i < ((((uint64_t)&__kernel_end + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE) - kernel_minimum; i += PAGE_SIZE)
 	{
-		uint64_t physical_address = text_address - kernel_minimum + kernel_physical_minimum;
-		memory_map(&pagemap, physical_address, text_address, PTE_PRESENT);
-	}
-
-	for(uint64_t rodata_address = rodata_start; rodata_address < rodata_end; rodata_address += PAGE_SIZE)
-	{
-		uint64_t physical_address = rodata_address - kernel_minimum + kernel_physical_minimum;
-		memory_map(&pagemap, physical_address, rodata_address, PTE_PRESENT | PTE_NX);
-	}
-
-	for(uint64_t data_address = data_start; data_address < data_end; data_address += PAGE_SIZE)
-	{
-		uint64_t physical_address = data_address - kernel_minimum + kernel_physical_minimum;
-		memory_map(&pagemap, physical_address, data_address, PTE_PRESENT | PTE_WRITABLE | PTE_NX);
+		memory_map(&pagemap, kernel_physical_minimum + i, kernel_minimum + i, PTE_PRESENT | PTE_WRITABLE);
 	}
 
 	for(uint64_t address = 0x1000; address < 0x100000000; address += PAGE_SIZE)
