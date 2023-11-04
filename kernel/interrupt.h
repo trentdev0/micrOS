@@ -37,6 +37,7 @@ void __attribute__((interrupt)) interrupt10(void * frame);
 void __attribute__((interrupt)) interrupt11(void * frame);
 void __attribute__((interrupt)) interrupt12(void * frame);
 void __attribute__((interrupt)) interrupt13(void * frame);
+void __attribute__((interrupt)) interrupt14(void * frame);
 void __attribute__((interrupt)) interrupt15(void * frame);
 void __attribute__((interrupt)) interrupt16(void * frame);
 void __attribute__((interrupt)) interrupt18(void * frame);

@@ -3,13 +3,11 @@
 
 #include "thirdparty/limine.h"
 #include "arch/amd64-pc/cpu.h"
+#include "arch/amd64-pc/gdt.h"
 #include "serial.h"
 #include "stream.h"
 #include "interrupt.h"
 #include "ansi.h"
-#include "arch/amd64-pc/gdt.h"
-
-extern char __kernel_end[];
 
 void _start()
 {
@@ -46,6 +44,7 @@ void _start()
 	interrupt_register(11, &interrupt11, 0x8E);
 	interrupt_register(12, &interrupt12, 0x8E);
 	interrupt_register(13, &interrupt13, 0x8E);
+	interrupt_register(14, &interrupt14, 0x8E);
 	interrupt_register(15, &interrupt15, 0x8E);
 	interrupt_register(16, &interrupt16, 0x8E);
 	interrupt_register(18, &interrupt18, 0x8E);
@@ -58,6 +57,5 @@ void _start()
 	stream_printf(current_stream, "Hello, world!\r\n");
 
 	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
-	
 	hang();
 }

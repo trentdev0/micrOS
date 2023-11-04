@@ -26,7 +26,7 @@ ifeq ($(3RDPARTY), true)
 endif
 
 ifeq ($(ARCH), amd64-pc)
-	LDFLAGS += -Tkernel/arch/amd64-pc/linker.ld
+	LDFLAGS += -Tkernel/arch/amd64-pc/amd64-pc.ld
 	ARCH_C_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.c)
 	ARCH_S_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.S)
 	ARCH_OBJ_C_FILES := $(patsubst $(KERNEL)/arch/amd64-pc/%.c, $(KERNEL)/arch/amd64-pc/%.o, $(ARCH_C_FILES))

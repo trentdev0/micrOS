@@ -131,6 +131,17 @@ void interrupt13(void * frame)
 	hang();
 }
 
+void interrupt14(void * frame)
+{
+	(void)frame;
+
+	uint64_t fault_address;
+	asm volatile("mov %%cr2, %0" :"=r"(fault_address) :: "memory");
+	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Page fault occured!\r\n" ALIGN "Here's the address of where the page fault occured (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", fault_address);
+
+	hang();
+}
+
 void interrupt15(void * frame)
 {
 	(void)frame;
