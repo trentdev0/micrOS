@@ -49,89 +49,6 @@ static volatile struct limine_paging_mode_request paging_mode_request = {
 	.flags = 0
 };
 
-uint64_t * memory_next(uint64_t * current, uint64_t index)
-{
-	if((current[index] & 1) != 0)
-	{
-		return (uint64_t *)((current[index] & PTE_ADDRESS_MASK));
-	}
-
-	uint64_t next = memory_allocate();
-	memset((void *)next, 0, PAGE_SIZE);
-
-	if(next == 0xFFFFFFFFFFFFFFFF)
-	{
-		return NULL;
-	}
-
-	current[index] = (next - OFFSET) | PTE_PRESENT | PTE_WRITABLE | PTE_USER;
-	return (uint64_t *)(next);
-}
-
-
-void memory_unmap(pagemap_t * pagemap, uint64_t virtual_address)
-{
-	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FF << 39)) >> 39;
-	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FF << 30)) >> 30;
-	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FF << 21)) >> 21;
-	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FF << 12)) >> 12;
-
-	uint64_t * pml3 = memory_next(pagemap->start, pml4_index);
-	uint64_t * pml2 = memory_next(pml3, pml3_index);
-	uint64_t * pml1 = memory_next(pml2, pml2_index);
-
-	pml1[pml1_index] = 0;
-
-	asm volatile("invlpg %0" : : "m"(*(char *)virtual_address) : "memory");
-}
-
-void memory_map(pagemap_t * pagemap, uint64_t physical_address, uint64_t virtual_address, uint64_t flags)
-{
-	uint64_t pml4_index = (virtual_address & ((uint64_t)0x1FF << 39)) >> 39;
-	uint64_t pml3_index = (virtual_address & ((uint64_t)0x1FF << 30)) >> 30;
-	uint64_t pml2_index = (virtual_address & ((uint64_t)0x1FF << 21)) >> 21;
-	uint64_t pml1_index = (virtual_address & ((uint64_t)0x1FF << 12)) >> 12;
-	uint64_t * pml3 = memory_next(pagemap->start, pml4_index);
-	uint64_t * pml2 = memory_next(pml3, pml3_index);
-	uint64_t * pml1 = memory_next(pml2, pml2_index);
-
-	pml1[pml1_index] = physical_address | flags;
-}
-
-uint64_t * memory_virt2pte(pagemap_t * pagemap, uint64_t address)
-{
-	uint64_t pml4_index = (address & ((uint64_t)0x1FFLLU << 39)) >> 39;
-	uint64_t pml3_index = (address & ((uint64_t)0x1FFLLU << 30)) >> 30;
-	uint64_t pml2_index = (address & ((uint64_t)0x1FFLLU << 21)) >> 21;
-	uint64_t pml1_index = (address & ((uint64_t)0x1FFLLU << 12)) >> 12;
-
-	uint64_t *pml3 = memory_next(pagemap->start, pml4_index);
-	if(pml3 == NULL)
-	{
-		return NULL;
-	}
-
-	uint64_t *pml2 = memory_next(pml3, pml3_index);
-	if(pml2 == NULL)
-	{
-		return NULL;
-	}
-
-	uint64_t *pml1 = memory_next(pml2, pml2_index);
-	if(pml1 == NULL)
-	{
-		return NULL;
-	}
-
-	return &pml1[pml1_index];
-}
-
-uint64_t memory_virt2phys(pagemap_t * pagemap, uint64_t address)
-{
-	uint64_t * pte = memory_virt2pte(pagemap, address);
-	return *pte & PTE_ADDRESS_MASK;
-}
-
 int memory_init()
 {
 	struct limine_memmap_response * memmap = memmap_request.response;
@@ -192,31 +109,10 @@ int memory_init()
 	kernel_physical_size = kernel_size;
 	kernel_physical_maximum = kernel_physical_minimum + kernel_physical_size;
 
-	virtual_address_minimum = regions[regions_size - 1].memory_maximum;
-	virtual_address_maximum = kernel_minimum;
-	virtual_address_size = virtual_address_maximum - virtual_address_minimum;
-	virtual_address_size = PAGE_ALIGN(virtual_address_size);
-	virtual_address_maximum = virtual_address_size - virtual_address_minimum;
-
-	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of available virtual address space (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", virtual_address_minimum, virtual_address_maximum, virtual_address_size);
 	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in virtual memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_minimum, kernel_maximum, kernel_size);
 	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in physical memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_physical_minimum, kernel_physical_maximum, kernel_physical_size);
 
-	pagemap.start = (uint64_t *)memory_allocate();
-	memset((uint64_t *)pagemap.start, 0, PAGE_SIZE);
-
-	for(uint64_t i = 0; i < ((((uint64_t)&__kernel_end + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE) - kernel_minimum; i += PAGE_SIZE)
-	{
-		memory_map(&pagemap, kernel_physical_minimum + i, kernel_minimum + i, PTE_PRESENT | PTE_WRITABLE);
-	}
-
-	for(uint64_t address = 0x1000; address < 0x100000000; address += PAGE_SIZE)
-	{
-		memory_map(&pagemap, address, address, PTE_PRESENT | PTE_WRITABLE);
-		memory_map(&pagemap, address, address + OFFSET, PTE_PRESENT | PTE_WRITABLE | PTE_NX);
-	}
-
-	memory_switch(&pagemap);
+	/* Virtual memory drivers were removed, working on them right now! */
 
 	return 0;
 }
