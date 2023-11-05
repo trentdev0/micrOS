@@ -1,5 +1,3 @@
-<img align="left" width="70" height="70" src=".assets/logo1.png" alt="The M/UX logo!">
-
 # M/UX
 ## About
 M/UX is a work-in-progress UNIX-like kernel for amd64 processors, designed to run with the limine bootloader, a bootloader with a superior boot protocol.
@@ -11,7 +9,7 @@ M/UX is a work-in-progress UNIX-like kernel for amd64 processors, designed to ru
 - [X] ACPI
 - [ ] Timer interrupt
 - [X] Physical memory management
-- [X] Virtual memory management
+- [ ] Virtual memory management
 - [ ] Multitasking
 - [ ] Virtual filesystem
 - [ ] Print `Hello, world!` in userland
@@ -47,4 +45,4 @@ target remote localhost:1234
 ```
 # Screenshot(s)
 Here's what M/UX currently looks like when you run it:
-![Here's the latest screenshot!](.assets/screenshot1.png)
+![Here's the latest screenshot!](.assets/screenshot2.png)
