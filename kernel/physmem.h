@@ -26,13 +26,15 @@ extern uint64_t regions_size;
 
 extern uint64_t virtual_address_minimum, virtual_address_maximum, virtual_address_size;
 
+extern volatile struct limine_kernel_address_request kernel_address_request;
+extern volatile struct limine_memmap_request memmap_request;
 extern volatile struct limine_hhdm_request hhdm_request;
 
 #define OFFSET hhdm_request.response->offset
 
 #define PAGE_SIZE 4096
-
-#define PAGE_ALIGN(VALUE) (VALUE / PAGE_SIZE) * PAGE_SIZE
+#define PAGE_ALIGN_UP(ADDRESS) (ADDRESS + (PAGE_SIZE - 1)) / PAGE_SIZE * PAGE_SIZE
+#define PAGE_ALIGN_DOWN(ADDRESS) (ADDRESS / PAGE_SIZE) * PAGE_SIZE
 
 /* Set the state of a bit in memory. */
 static inline void physmem_setbit(uint8_t * array, uint64_t index, bool value)

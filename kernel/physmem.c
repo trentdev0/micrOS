@@ -100,7 +100,7 @@ int physmem_init()
 
 	kernel_minimum = kernel_address_request.response->virtual_base;
 	kernel_maximum = (uint64_t)&__kernel_end;
-	kernel_size = (uint64_t)&__kernel_end - kernel_address_request.response->virtual_base;
+	kernel_size = kernel_maximum - kernel_minimum;
 
 	kernel_physical_minimum = kernel_address_request.response->physical_base;
 	kernel_physical_size = kernel_size;

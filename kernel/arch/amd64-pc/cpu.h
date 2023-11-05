@@ -58,3 +58,56 @@ static inline void outl(uint16_t port, uint32_t data)
 {
 	asm volatile("outl %0, %1" : : "a" (data), "dN" (port));
 }
+
+static inline void invlpg(void * address)
+{
+	asm volatile("invlpg (%0)" : : "r"(address) : "memory");
+}
+
+static inline uint64_t read_cr0()
+{
+	uint64_t return_value;
+	asm volatile ("mov %%cr0, %0" : "=r"(return_value) :: "memory");
+	return return_value;
+}
+
+static inline uint64_t read_cr2()
+{
+	uint64_t return_value;
+	asm volatile ("mov %%cr2, %0" : "=r"(return_value) :: "memory");
+	return return_value;
+}
+
+static inline uint64_t read_cr3()
+{
+	uint64_t return_value;
+	asm volatile ("mov %%cr3, %0" : "=r"(return_value) :: "memory");
+	return return_value;
+}
+
+static inline uint64_t read_cr4()
+{
+	uint64_t return_value;
+	asm volatile ("mov %%cr4, %0" : "=r"(return_value) :: "memory");
+	return return_value;
+}
+
+static inline void write_cr0(uint64_t value)
+{
+	asm volatile ("mov %0, %%cr0" :: "r"(value) : "memory");
+}
+
+static inline void write_cr2(uint64_t value)
+{
+	asm volatile ("mov %0, %%cr2" :: "r"(value) : "memory");
+}
+
+static inline void write_cr3(uint64_t value)
+{
+	asm volatile ("mov %0, %%cr3" :: "r"(value) : "memory");
+}
+
+static inline void write_cr4(uint64_t value)
+{
+	asm volatile ("mov %0, %%cr4" :: "r"(value) : "memory");
+}

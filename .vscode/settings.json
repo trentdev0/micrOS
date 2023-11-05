@@ -51,6 +51,7 @@
 		"vector": "c",
 		"iterator": "c",
 		"ansi.h": "c",
-		"gdt.h": "c"
+		"gdt.h": "c",
+		"cerrno": "c"
 	}
 }
