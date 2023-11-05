@@ -1,15 +1,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "memory.h"
+#include "physmem.h"
 #include "stream.h"
-#include "memory.h"
 #include "ansi.h"
 #include "string.h"
 #include "thirdparty/limine.h"
 #include "arch/amd64-pc/cpu.h"
-
-pagemap_t pagemap;
 
 region_t regions[128];
 uint64_t regions_size = 0;
@@ -49,7 +46,7 @@ static volatile struct limine_paging_mode_request paging_mode_request = {
 	.flags = 0
 };
 
-int memory_init()
+int physmem_init()
 {
 	struct limine_memmap_response * memmap = memmap_request.response;
 	struct limine_memmap_entry ** entries = memmap->entries;
@@ -62,7 +59,7 @@ int memory_init()
 		{
 		case LIMINE_MEMMAP_USABLE:
 			/* The value memory_minimum represents the start of the region of free memory. */
-			regions[regions_size].memory_minimum = entry->base + OFFSET;
+			regions[regions_size].memory_minimum = entry->base;
 			/* The value memory_size represents the exact amount of free memory in bytes. */
 			regions[regions_size].memory_size = entry->length;
 			/* The value memory_maximum represents the end of the region of free memory. */
@@ -84,7 +81,7 @@ int memory_init()
 			 *	Stores the amount of pages needed to store the allocation status of all pages in the region.
 			 *	It may require some optimization, see the comment below this one.
 			 */
-			regions[regions_size].status_pages_size = memory_byte2page(regions[regions_size].status_bytes_size);
+			regions[regions_size].status_pages_size = physmem_byte2page(regions[regions_size].status_bytes_size);
 
 			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of entry " BOLD_WHITE "%lu" RESET " of usable memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", regions_size + 1, regions[regions_size].memory_minimum, regions[regions_size].memory_maximum, regions[regions_size].memory_size);
 
@@ -118,15 +115,15 @@ int memory_init()
 }
 
 /* Display the bitmap of a specific region by the region's index. */
-void memory_printbitmap(uint64_t index)
+void physmem_printbitmap(uint64_t index)
 {
 	for (uint64_t i = 0; i < regions[index].status_bits_size; i++)
 	{
-		if (memory_getstatus(index, i) == true)
+		if (physmem_getstatus(index, i) == true)
 		{
 			stream_printf(current_stream, "\x1b[36m1");
 		}
-		else if (memory_getstatus(index, i) == false)
+		else if (physmem_getstatus(index, i) == false)
 		{
 			stream_printf(current_stream, "\x1b[35m0");
 		}
@@ -138,21 +135,21 @@ void memory_printbitmap(uint64_t index)
  *	Print all of the addresses of all existing pages in a region, regardless
  *	of whether they are allocated or not.
  */
-void memory_printpages(uint64_t index)
+void physmem_printpages(uint64_t index)
 {
 	for (uint64_t i = 0; i < regions[index].pages_size; i++)
 	{
-		stream_printf(current_stream, "0x%lx ", memory_index2address(index, i));
+		stream_printf(current_stream, "0x%lx ", physmem_index2address(index, i));
 	}
 	stream_printf(current_stream, "\r\n");
 }
 
 /* Find a free page, and return it's index. */
-uint64_t memory_find_free(uint64_t index)
+uint64_t physmem_find_free(uint64_t index)
 {
 	for(uint64_t i = regions[index].status_pages_size; i < regions[index].status_bits_size; i++)
 	{
-		if(memory_getstatus(index, i) == false)
+		if(physmem_getstatus(index, i) == false)
 		{
 			return i;
 		}
@@ -162,34 +159,35 @@ uint64_t memory_find_free(uint64_t index)
 }
 
 /* Allocate a 4KiB page. */
-uint64_t memory_allocate()
+int physmem_allocate(uint64_t * address)
 {
 	for(uint64_t i = 0; i < regions_size; i++)
 	{
-		uint64_t j = memory_find_free(i);
+		uint64_t j = physmem_find_free(i);
 		if(j != 0xFFFFFFFFFFFFFFFF)
 		{
-			uint64_t k = memory_index2address(i, j);
-			memory_mark_allocated(i, j);
-			return k;
+			uint64_t k = physmem_index2address(i, j);
+			physmem_mark_allocated(i, j);
+			*address = k;
+			return 0;
 		}
 	}
 
-	return 0xFFFFFFFFFFFFFFFF;
+	return -1;
 }
 
 /* Free a 4KiB page. */
-int memory_free(uint64_t address)
+int physmem_free(uint64_t address)
 {
-	uint64_t index0 = memory_getregion(address);
-	uint64_t index1 = memory_address2index(index0, address);
+	uint64_t index0 = physmem_getregion(address);
+	uint64_t index1 = physmem_address2index(index0, address);
 
 	if(index0 == 0xFFFFFFFFFFFFFFFF)
 	{
 		return -1;
 	}
 
-	memory_mark_free(index0, index1);
+	physmem_mark_free(index0, index1);
 
 	return 0;
 }

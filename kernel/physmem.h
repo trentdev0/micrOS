@@ -7,11 +7,6 @@
 
 typedef struct
 {
-	uint64_t * start;
-} pagemap_t;
-
-typedef struct
-{
 	/*
 	 *	These values represent the address where the memory starts, ends, and
 	 *	the total region's size in bytes.
@@ -29,31 +24,7 @@ typedef struct
 extern region_t regions[128];
 extern uint64_t regions_size;
 
-extern pagemap_t pagemap;
-
 extern uint64_t virtual_address_minimum, virtual_address_maximum, virtual_address_size;
-
-enum
-{
-	PTE_ADDRESS_MASK = 0x000FFFFFFFFFF000,
-	PTE_PRESENT = (1ull << 0ull),
-	PTE_WRITABLE = (1ull << 1ull),
-	PTE_USER = (1ull << 2ull),
-	PTE_NX = (1ull << 63ull)
-};
-
-/*
- *	All processes, including the kernel, have their own pagemap.
- */
-enum
-{
-	/* Space reserved in virtual memory for a single userland program. */
-	RANGE_USERLAND_MINIMUM = 0x0000000000000000,
-	RANGE_USERLAND_MAXIMUM = 0xFFFFFFFF7FFFFFFF,
-	/* Space reserved in virtual memory for the kernel. */
-	RANGE_KERNEL_START = 0xFFFFFFFF80000000,
-	RANGE_KERNEL_END = 0xFFFFFFFFFFFFFFFE
-};
 
 extern volatile struct limine_hhdm_request hhdm_request;
 
@@ -64,7 +35,7 @@ extern volatile struct limine_hhdm_request hhdm_request;
 #define PAGE_ALIGN(VALUE) (VALUE / PAGE_SIZE) * PAGE_SIZE
 
 /* Set the state of a bit in memory. */
-static inline void memory_setbit(uint8_t * array, uint64_t index, bool value)
+static inline void physmem_setbit(uint8_t * array, uint64_t index, bool value)
 {
 	uint64_t byte_index = index / 8;
 	uint64_t bit_offset = index % 8;
@@ -80,7 +51,7 @@ static inline void memory_setbit(uint8_t * array, uint64_t index, bool value)
 }
 
 /* Get the state of a bit in memory. */
-static inline bool memory_getbit(uint8_t * array, uint64_t index)
+static inline bool physmem_getbit(uint8_t * array, uint64_t index)
 {
 	uint64_t byte_index = index / 8;
 	uint64_t bit_offset = index % 8;
@@ -89,58 +60,70 @@ static inline bool memory_getbit(uint8_t * array, uint64_t index)
 }
 
 /* Convert number of pages into bytes... */
-static inline uint64_t memory_page2byte(uint64_t pages)
+static inline uint64_t physmem_page2byte(uint64_t pages)
 {
 	return pages * PAGE_SIZE;
 }
 
 /* Convert an address to an index, by region index. */
-static inline uint64_t memory_address2index(uint64_t index, uint64_t address)
+static inline uint64_t physmem_address2index(uint64_t index, uint64_t address)
 {
 	return (address - regions[index].pages_minumum) / PAGE_SIZE;
 }
 
 /* Convert an index to an address, by region index. */
-static inline uint64_t memory_index2address(uint64_t index0, uint64_t index1)
+static inline uint64_t physmem_index2address(uint64_t index0, uint64_t index1)
 {
 	return regions[index0].pages_minumum + (index1 * PAGE_SIZE); 
 }
 
 /* Get only pages that aren't status pages. */
-static inline uint64_t memory_offset(uint64_t index)
+static inline uint64_t physmem_offset(uint64_t index)
 {
 	return regions[index].pages_size - regions[index].status_pages_size;
 }
 
-/* Mark a page allocated by its index. */
-static inline void memory_mark_allocated(uint64_t index0, uint64_t index1)
+/*
+ *	Mark a page as allocated by its index.
+ *	Make sure we're writing the mapped memory, by adding the HHDM offset
+ *	because we can't actually write to physical memory here...
+ */
+static inline void physmem_mark_allocated(uint64_t index0, uint64_t index1)
 {
-	memory_setbit((uint8_t *)regions[index0].memory_minimum, index1, true);
+	physmem_setbit((uint8_t *)regions[index0].memory_minimum + OFFSET, index1, true);
 }
 
-/* Mark a page free by its index. */
-static inline void memory_mark_free(uint64_t index0, uint64_t index1)
+/*
+ *	Mark a page free by its index.
+ *	Make sure we're writing the mapped memory, by adding the HHDM offset
+ *	because we can't actually write to physical memory here...
+ */
+static inline void physmem_mark_free(uint64_t index0, uint64_t index1)
 {
-	memory_setbit((uint8_t *)regions[index0].memory_minimum, index1, false);
+	physmem_setbit((uint8_t *)regions[index0].memory_minimum + OFFSET, index1, false);
 }
 
-static inline bool memory_getstatus(uint64_t index0, uint64_t index1)
+/*
+ *	Let's make sure we're reading the mapped memory, because we can't actually
+ *	read or write to physical memory here.
+ */
+static inline bool physmem_getstatus(uint64_t index0, uint64_t index1)
 {
-	return memory_getbit((uint8_t *)regions[index0].memory_minimum, index1);
+	return physmem_getbit((uint8_t *)regions[index0].memory_minimum + OFFSET, index1);
 }
 
 /* Is a number in between a range of two other numbers? */
-static inline bool memory_inrange(uint64_t number, uint64_t minimum, uint64_t maximum)
+static inline bool physmem_inrange(uint64_t number, uint64_t minimum, uint64_t maximum)
 {
 	return (number >= minimum) && (number <= maximum);
 }
 
 /* Return the region index from an address. */
-static inline uint64_t memory_getregion(uint64_t address)
+static inline uint64_t physmem_getregion(uint64_t address)
 {
 	for(uint64_t i = 0; i < regions_size; i++)
 	{
-		if(memory_inrange(address, regions[i].memory_minimum, regions[i].memory_maximum) == true)
+		if(physmem_inrange(address, regions[i].memory_minimum, regions[i].memory_maximum) == true)
 		{
 			return i;
 		}
@@ -150,7 +133,7 @@ static inline uint64_t memory_getregion(uint64_t address)
 }
 
 /* Convert bytes to amount of pages, returns 1 at least. */
-static inline uint64_t memory_byte2page(uint64_t bytes)
+static inline uint64_t physmem_byte2page(uint64_t bytes)
 {
 	uint64_t return_value = 0;
 	return_value = bytes / PAGE_SIZE;
@@ -164,6 +147,6 @@ static inline uint64_t memory_byte2page(uint64_t bytes)
 	return return_value;
 }
 
-int memory_init();
-uint64_t memory_allocate();
-int memory_free(uint64_t address);
+int physmem_init();
+int physmem_allocate(uint64_t * address);
+int physmem_free(uint64_t address);

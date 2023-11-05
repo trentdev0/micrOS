@@ -8,6 +8,7 @@
 #include "stream.h"
 #include "interrupt.h"
 #include "ansi.h"
+#include "physmem.h"
 
 void _start()
 {
@@ -21,13 +22,8 @@ void _start()
 	 */
 	if(stream_init() != 0) { hang(); }
 
-	/*
-	 *	We merged the physical memory & virtual memory modules into one, since we want the page
-	 *	frame allocator to be "more connected" to our virtual memory module, meaning that we
-	 *	just need to call a function for allocation and de-allocation, without worrying about
-	 *	conversion of physical address to virtual address after allocation.
-	 */
-	if(memory_init() != 0) { hang(); }
+	/* Set up the page frame allocator! */
+	if(physmem_init() != 0) { hang(); }
 
 	/* Tell the CPU where our new IDT (Interrupt Descriptor Table) is at... */
 	interrupt_flush();
@@ -55,6 +51,25 @@ void _start()
 	 *	succeeded or not.
 	 */
 	stream_printf(current_stream, "Hello, world!\r\n");
+
+	uint64_t pointer0;
+	physmem_allocate(&pointer0);
+	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", pointer0);
+
+	uint64_t pointer1;
+	physmem_allocate(&pointer1);
+	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", pointer1);
+
+	uint64_t pointer2;
+	physmem_allocate(&pointer2);
+	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", pointer2);
+
+	physmem_free(pointer0);
+
+	stream_printf(current_stream, "Freed the first allocated page!\r\n");
+
+	physmem_allocate(&pointer0);
+	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", pointer0);
 
 	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
 	hang();

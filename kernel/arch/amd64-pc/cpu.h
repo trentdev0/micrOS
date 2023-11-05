@@ -2,8 +2,6 @@
 
 #include <stdint.h>
 
-#include "../../memory.h"
-
 /* Disable interrupts. */
 static inline void cli()
 {
@@ -24,12 +22,6 @@ static inline void hlt()
 
 /* Hang a CPU. */
 void hang();
-
-/* Switch to a pagemap. */
-static inline void memory_switch(pagemap_t *pagemap)
-{
-	asm volatile("mov %0, %%cr3" : : "r"((void *)pagemap->start - hhdm_request.response->offset) : "memory");
-}
 
 static inline uint8_t inb(uint16_t port)
 {
