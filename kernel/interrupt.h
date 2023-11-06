@@ -26,20 +26,20 @@ static inline void interrupt_wipe()
 	memset(idt, 0, sizeof(idt));
 }
 
-void __attribute__((interrupt)) interrupt0(void * frame);
-void __attribute__((interrupt)) interrupt2(void * frame);
-void __attribute__((interrupt)) interrupt4(void * frame);
-void __attribute__((interrupt)) interrupt5(void * frame);
-void __attribute__((interrupt)) interrupt6(void * frame);
-void __attribute__((interrupt)) interrupt7(void * frame);
-void __attribute__((interrupt)) interrupt8(void * frame);
-void __attribute__((interrupt)) interrupt10(void * frame);
-void __attribute__((interrupt)) interrupt11(void * frame);
-void __attribute__((interrupt)) interrupt12(void * frame);
-void __attribute__((interrupt)) interrupt13(void * frame);
-void __attribute__((interrupt)) interrupt14(void * frame);
-void __attribute__((interrupt)) interrupt15(void * frame);
-void __attribute__((interrupt)) interrupt16(void * frame);
-void __attribute__((interrupt)) interrupt18(void * frame);
-void __attribute__((interrupt)) interrupt21(void * frame);
+extern void interrupt0();
+extern void interrupt2();
+extern void interrupt4();
+extern void interrupt5();
+extern void interrupt6();
+extern void interrupt7();
+extern void interrupt8();
+extern void interrupt10();
+extern void interrupt11();
+extern void interrupt12();
+extern void interrupt13();
+extern void interrupt14();
+extern void interrupt15();
+extern void interrupt16();
+extern void interrupt18();
+extern void interrupt21();
 #endif

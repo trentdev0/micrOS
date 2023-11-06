@@ -17,21 +17,21 @@ OBJ_FILES := $(OBJ_C_FILES) $(OBJ_S_FILES)
 ARCH ?= amd64-pc
 
 ifeq ($(3RDPARTY), true)
-	3RDPARTY_SRC_C_FILES := $(wildcard $(KERNEL)/thirdparty/*.c)
-	3RDPARTY_SRC_S_FILES := $(wildcard $(KERNEL)/thirdparty/*.S)
-	3RDPARTY_OBJ_C_FILES := $(patsubst $(KERNEL)/thirdparty/%.c, $(KERNEL)/thirdparty/%.o, $(3RDPARTY_SRC_C_FILES))
-	3RDPARTY_OBJ_S_FILES := $(patsubst $(KERNEL)/thirdparty/%.S, $(KERNEL)/thirdparty/%.o, $(3RDPARTY_SRC_S_FILES))
-	OBJ_FILES += $(3RDPARTY_OBJ_C_FILES) $(3RDPARTY_OBJ_S_FILES)
-	CFLAGS += -DTHIRDPARTY
+3RDPARTY_SRC_C_FILES := $(wildcard $(KERNEL)/thirdparty/*.c)
+3RDPARTY_SRC_S_FILES := $(wildcard $(KERNEL)/thirdparty/*.S)
+3RDPARTY_OBJ_C_FILES := $(patsubst $(KERNEL)/thirdparty/%.c, $(KERNEL)/thirdparty/%.o, $(3RDPARTY_SRC_C_FILES))
+3RDPARTY_OBJ_S_FILES := $(patsubst $(KERNEL)/thirdparty/%.S, $(KERNEL)/thirdparty/%.o, $(3RDPARTY_SRC_S_FILES))
+OBJ_FILES += $(3RDPARTY_OBJ_C_FILES) $(3RDPARTY_OBJ_S_FILES)
+CFLAGS += -DTHIRDPARTY
 endif
 
 ifeq ($(ARCH), amd64-pc)
-	LDFLAGS += -Tkernel/arch/amd64-pc/amd64-pc.ld
-	ARCH_C_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.c)
-	ARCH_S_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.S)
-	ARCH_OBJ_C_FILES := $(patsubst $(KERNEL)/arch/amd64-pc/%.c, $(KERNEL)/arch/amd64-pc/%.o, $(ARCH_C_FILES))
-	ARCH_OBJ_S_FILES := $(patsubst $(KERNEL)/arch/amd64-pc/%.S, $(KERNEL)/arch/amd64-pc/%.o, $(ARCH_S_FILES))
-	OBJ_FILES += $(ARCH_OBJ_C_FILES) $(ARCH_OBJ_S_FILES)
+LDFLAGS += -Tkernel/arch/amd64-pc/amd64-pc.ld
+ARCH_C_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.c)
+ARCH_S_FILES := $(wildcard $(KERNEL)/arch/amd64-pc/*.S)
+ARCH_OBJ_C_FILES := $(patsubst $(KERNEL)/arch/amd64-pc/%.c, $(KERNEL)/arch/amd64-pc/%.o, $(ARCH_C_FILES))
+ARCH_OBJ_S_FILES := $(patsubst $(KERNEL)/arch/amd64-pc/%.S, $(KERNEL)/arch/amd64-pc/%.o, $(ARCH_S_FILES))
+OBJ_FILES += $(ARCH_OBJ_C_FILES) $(ARCH_OBJ_S_FILES)
 endif
 
 .PHONY: all clean limine cdrom run run-serial debug
@@ -54,19 +54,19 @@ $(KERNEL)/%.o: $(KERNEL)/%.S
 	$(AS) $< -o $@
 
 ifeq ($(ARCH), amd64-pc)
-	$(KERNEL)/arch/amd64-pc/%.o: $(KERNEL)/arch/amd64-pc/%.c
-		$(CC) $(CFLAGS) -c $< -o $@
+$(KERNEL)/arch/amd64-pc/%.o: $(KERNEL)/arch/amd64-pc/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-	$(KERNEL)/arch/amd64-pc/%.o: $(KERNEL)/arch/amd64-pc/%.S
-		$(AS) $< -o $@
+$(KERNEL)/arch/amd64-pc/%.o: $(KERNEL)/arch/amd64-pc/%.S
+	$(AS) $< -o $@
 endif
 
 ifeq ($(3RDPARTY), true)
-	$(KERNEL)/thirdparty/%.o: $(KERNEL)/thirdparty/%.c
-		$(CC) $(CFLAGS) -c $< -o $@
+$(KERNEL)/thirdparty/%.o: $(KERNEL)/thirdparty/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-	$(KERNEL)/thirdparty/%.o: $(KERNEL)/thirdparty/%.S
-		$(AS) $< -o $@
+$(KERNEL)/thirdparty/%.o: $(KERNEL)/thirdparty/%.S
+	$(AS) $< -o $@
 endif
 
 limine:
