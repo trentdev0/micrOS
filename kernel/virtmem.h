@@ -3,48 +3,63 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct
-{
-	/* Is the target present? */
-	uint64_t present : 1;
-	/* Should the target have write permissions? */
-	uint64_t write : 1;
-	/* Should ring3 be able to interact with the target? */
-	uint64_t access : 1;
-	/* Should the target have a writethrough caching policy? */
-	uint64_t writethrough : 1;
-	/* Is the target not cacheable? */
-	uint64_t notcacheable : 1;
-	uint64_t accessed : 1;
-	uint64_t unused0 : 1;
-	uint64_t global : 1;
-	uint64_t unused1 : 51;
-	uint64_t memprotkey : 4;
-	uint64_t noexec : 1;
-} pagetable_lowest_t;
+#include "physmem.h"
 
 typedef struct
 {
 	/* Is the target present? */
-	uint64_t present : 1;
-	/* Should the target have write permissions? */
-	uint64_t write : 1;
-	/* Should ring3 be able to interact with the target? */
-	uint64_t access : 1;
-	/* Should the target have a writethrough caching policy? */
-	uint64_t writethrough : 1;
-	/* Is the target not cacheable? */
-	uint64_t notcacheable : 1;
-	uint64_t unused0 : 1;
-	
-	/*
-	 *	It's actually used, we just set it to zero in order to allow
-	 *	4KiB pages.
-	 */
-	uint64_t unused1 : 1;
-	uint64_t unused1 : 52;
-	uint64_t memprotkey : 4;
-	uint64_t noexec : 1;
-} pagetable_directory_t;
+	uint8_t p : 1;
+	/* Are we allowed to write to the target? */
+	uint64_t rw : 1;
+	/* Can ring3 interact with the target? */
+	uint8_t us : 1;
+	uint8_t pwt : 1;
+	uint8_t pcd : 1;
+	uint8_t a : 1;
+	uint8_t avl0 : 1;
+	uint8_t rsvd : 1;
+	uint8_t avl1 : 4;
+	uint64_t zerome : 40;
+	uint16_t avl2 : 11;
+	uint8_t xd : 1;
+} page_level_t;
+
+typedef struct
+{
+	/* Is the target present? */
+	uint8_t p : 1;
+	/* Are we allowed to write to the target? */
+	uint8_t rw : 1;
+	/* Can ring3 interact with the target? */
+	uint8_t us : 1;
+	uint8_t pwt : 1;
+	uint8_t pcd : 1;
+	uint8_t a : 1;
+	uint8_t d : 1;
+	uint8_t pat : 1;
+	uint8_t g : 1;
+	uint8_t avl0 : 4;
+	uint64_t zerome : 40;
+	uint16_t pk : 11;
+	uint8_t xd : 1;
+} page_table_t;
+
+typedef struct
+{
+	uint64_t * top;
+} pagemap_t;
+
+#define USERLAND_END 0x00007FFFFFFFFFFF
+
+#define PTE_ADDRESS_MASK 0x000FFFFFFFFFF000
+#define PTE_PRESENT (1ull << 0ull)
+#define PTE_WRITABLE (1ull << 1ull)
+#define PTE_USER (1ull << 2ull)
+#define PTE_NX (1ull << 63ull)
+
+static inline void virtmem_switch(pagemap_t *pagemap)
+{
+	asm volatile("mov %0, %%cr3" : : "r"((void *)pagemap->top - OFFSET) : "memory");
+}
 
 int virtmem_init();
