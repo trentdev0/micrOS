@@ -17,7 +17,6 @@ extern char __kernel_end[];
 
 pagemap_t kernel_pagemap;
 
-
 uint64_t * virtmem_next(uint64_t * current, uint64_t index)
 {
 	if((current[index] & 1) != 0)
@@ -39,7 +38,6 @@ uint64_t * virtmem_next(uint64_t * current, uint64_t index)
 	current[index] = (next - OFFSET) | PTE_PRESENT | PTE_WRITABLE | PTE_USER;
 	return (uint64_t *)(next);
 }
-
 
 void virtmem_unmap(pagemap_t * pagemap, uint64_t virtual_address)
 {

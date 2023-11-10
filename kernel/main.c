@@ -10,6 +10,7 @@
 #include "ansi.h"
 #include "physmem.h"
 #include "virtmem.h"
+#include "range.h"
 
 void _start()
 {
@@ -25,6 +26,9 @@ void _start()
 
 	/* Set up the page frame allocator! */
 	if(physmem_init() != 0) { hang(); }
+
+	/* Calculate bounds in memory. */
+	if(range_init() != 0) { hang(); }
 
 	/* Set up the virtual memory manager! */
 	if(virtmem_init() != 0) { hang(); }

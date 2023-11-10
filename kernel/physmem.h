@@ -150,5 +150,7 @@ static inline uint64_t physmem_byte2page(uint64_t bytes)
 }
 
 int physmem_init();
+void physmem_printbitmaps();
+void physmem_drawbitmaps();
 int physmem_allocate(uint64_t * address);
 int physmem_free(uint64_t address);

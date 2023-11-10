@@ -7,13 +7,10 @@
 #include "string.h"
 #include "thirdparty/limine.h"
 #include "arch/amd64-pc/cpu.h"
+#include "range.h"
 
 region_t regions[128];
 uint64_t regions_size = 0;
-
-uint64_t kernel_minimum, kernel_maximum, kernel_size;
-uint64_t kernel_physical_minimum, kernel_physical_maximum, kernel_physical_size;
-uint64_t virtual_address_minimum, virtual_address_maximum, virtual_address_size;
 
 extern char __text_start[];
 extern char __text_end[];
@@ -98,24 +95,13 @@ int physmem_init()
 
 	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "In total, there are " BOLD_WHITE "%lu" RESET " bytes of usable memory.\r\n", installed_memory);
 
-	kernel_minimum = kernel_address_request.response->virtual_base;
-	kernel_maximum = (uint64_t)&__kernel_end;
-	kernel_size = kernel_maximum - kernel_minimum;
-
-	kernel_physical_minimum = kernel_address_request.response->physical_base;
-	kernel_physical_size = kernel_size;
-	kernel_physical_maximum = kernel_physical_minimum + kernel_physical_size;
-
-	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in virtual memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_minimum, kernel_maximum, kernel_size);
-	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of the kernel in physical memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", kernel_physical_minimum, kernel_physical_maximum, kernel_physical_size);
-
 	return 0;
 }
 
 /* Display the bitmap of a specific region by the region's index. */
 void physmem_printbitmap(uint64_t index)
 {
-	for (uint64_t i = 0; i < regions[index].status_bits_size; i++)
+	for(uint64_t i = 0; i < regions[index].status_bits_size; i++)
 	{
 		if (physmem_getstatus(index, i) == true)
 		{
@@ -127,6 +113,49 @@ void physmem_printbitmap(uint64_t index)
 		}
 	}
 	stream_printf(current_stream, "\x1b[0m\r\n");
+}
+
+/* Display the bitmap of all regions. */
+void physmem_printbitmaps()
+{
+	for(uint64_t i = 0; i < regions_size; i++)
+	{
+		for(uint64_t j = 0; j < regions[i].status_bits_size; j++)
+		{
+			if (physmem_getstatus(i, j) == true)
+			{
+				stream_printf(current_stream, "\x1b[36m1");
+			}
+			else if (physmem_getstatus(i, j) == false)
+			{
+				stream_printf(current_stream, "\x1b[35m0");
+			}
+		}
+	}
+	stream_printf(current_stream, "\x1b[0m\r\n");
+}
+
+void physmem_drawbitmaps()
+{
+	volatile uint32_t *framebuffer = framebuffer_request.response->framebuffers[0]->address;
+	uint64_t k = 0;
+
+	for (uint64_t i = 0; i < regions_size; i++)
+	{
+		for (uint64_t j = 0; j < regions[i].status_bits_size; j++)
+		{
+			if (physmem_getstatus(i, j) == true)
+			{
+				framebuffer[k] = RGB(255, 0, 0);
+			}
+			else
+			{
+				framebuffer[k] = RGB(0, 255, 0);
+			}
+
+			k++;
+		}
+	}
 }
 
 /*

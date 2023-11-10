@@ -10,6 +10,11 @@
 stream_t streams[8];
 stream_t * current_stream;
 
+volatile struct limine_framebuffer_request framebuffer_request = {
+	.id = LIMINE_FRAMEBUFFER_REQUEST,
+	.revision = 0
+};
+
 /*
  *	If we're compiling M/UX with third-party features enabled, we will have a framebuffer
  *	terminal, which is provided by flanterm. If we don't have flanterm, all communications
@@ -17,11 +22,6 @@ stream_t * current_stream;
  */
 #if defined(THIRDPARTY)
 struct flanterm_context * flanterm;
-
-static volatile struct limine_framebuffer_request framebuffer_request = {
-	.id = LIMINE_FRAMEBUFFER_REQUEST,
-	.revision = 0
-};
 
 void flanterm_putc(char character)
 {

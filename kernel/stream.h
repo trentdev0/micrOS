@@ -1,6 +1,13 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "serial.h"
+#include "thirdparty/limine.h"
+
+/* Yes, stream.h also has some basics for framebuffers. */
+extern volatile struct limine_framebuffer_request framebuffer_request;
+#define RGB(r, g, b) (((uint32_t)(r) << 16) | ((uint32_t)(g) << 8) | (uint32_t)(b))
 
 typedef struct
 {

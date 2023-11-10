@@ -49,8 +49,6 @@ typedef struct
 	uint64_t * top;
 } pagemap_t;
 
-#define USERLAND_END 0x00007FFFFFFFFFFF
-
 #define PTE_ADDRESS_MASK 0x000FFFFFFFFFF000
 #define PTE_PRESENT (1ull << 0ull)
 #define PTE_WRITABLE (1ull << 1ull)
