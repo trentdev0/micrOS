@@ -12,7 +12,7 @@
 	"files.associations": {
 		"flanterm.h": "c",
 		"serial.h": "c",
-		"stream.h": "c",
+		"terminal.h": "c",
 		"stdint.h": "c",
 		"compare": "cpp",
 		"acpi.h": "c",
@@ -41,7 +41,7 @@
 		"main.h": "c",
 		"process.h": "c",
 		"numeric": "c",
-		"ostream": "c",
+		"oterminal": "c",
 		"system_error": "c",
 		"typeinfo": "c",
 		"*.inc": "c",
@@ -52,6 +52,8 @@
 		"iterator": "c",
 		"ansi.h": "c",
 		"gdt.h": "c",
-		"cerrno": "c"
+		"cerrno": "c",
+		"mutex": "c",
+		"lapic.h": "c"
 	}
 }

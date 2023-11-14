@@ -4,7 +4,7 @@
 #include "arch/amd64-pc/cpu.h"
 #include "arch/amd64-pc/descriptor.h"
 #include "interrupt.h"
-#include "stream.h"
+#include "terminal.h"
 #include "ansi.h"
 
 #if defined(__x86_64__)
@@ -34,7 +34,7 @@ void interrupt_flush()
 
 void interrupt_handler(uint64_t number)
 {
-	stream_printf(current_stream, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Interrupt triggered (interrupt=" BOLD_WHITE "%lu" RESET")!\r\n", number);
+	terminal_printf(current_terminal, "[" BOLD_RED "EXCEPTION" RESET "]:" ALIGN "Interrupt triggered (interrupt=" BOLD_WHITE "%lu" RESET")!\r\n", number);
 	hang();
 }
 #endif

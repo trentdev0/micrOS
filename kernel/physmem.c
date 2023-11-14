@@ -1,24 +1,11 @@
-#include <stddef.h>
 #include <stdint.h>
+#include <stddef.h>
 
-#include "physmem.h"
-#include "stream.h"
-#include "ansi.h"
 #include "string.h"
+#include "physmem.h"
+#include "terminal.h"
+#include "ansi.h"
 #include "thirdparty/limine.h"
-#include "arch/amd64-pc/cpu.h"
-#include "range.h"
-
-region_t regions[128];
-uint64_t regions_size = 0;
-
-extern char __text_start[];
-extern char __text_end[];
-extern char __rodata_start[];
-extern char __rodata_end[];
-extern char __data_start[];
-extern char __data_end[];
-extern char __kernel_end[];
 
 volatile struct limine_memmap_request memmap_request = {
 	.id = LIMINE_MEMMAP_REQUEST,
@@ -30,191 +17,137 @@ volatile struct limine_hhdm_request hhdm_request = {
 	.revision = 0
 };
 
-volatile struct limine_kernel_address_request kernel_address_request = {
-	.id = LIMINE_KERNEL_ADDRESS_REQUEST,
-	.revision = 0
-};
-
-static volatile struct limine_paging_mode_request paging_mode_request = {
-	.id = LIMINE_PAGING_MODE_REQUEST,
-	.revision = 0,
-	.response = NULL,
-	.mode = LIMINE_PAGING_MODE_X86_64_5LVL,
-	.flags = 0
-};
+uint8_t *bitmap = NULL;
+uint64_t highest_page_index = 0;
+uint64_t last_used_index = 0;
+uint64_t usable_pages = 0;
+uint64_t used_pages = 0;
+uint64_t reserved_pages = 0;
 
 int physmem_init()
 {
-	struct limine_memmap_response * memmap = memmap_request.response;
-	struct limine_memmap_entry ** entries = memmap->entries;
+	struct limine_memmap_response *memmap = memmap_request.response;
+	struct limine_hhdm_response *hhdm = hhdm_request.response;
+	struct limine_memmap_entry **entries = memmap->entries;
 
-	for (uint64_t i = 0; i < memmap->entry_count; i++)
+	uint64_t highest_address = 0;
+
+	for(uint64_t i = 0; i < memmap->entry_count; i++)
 	{
-		struct limine_memmap_entry * entry = entries[i];
+		struct limine_memmap_entry *entry = entries[i];
 
-		switch (entry->type)
+		switch(entry->type)
 		{
-		case LIMINE_MEMMAP_USABLE:
-			/* The value memory_minimum represents the start of the region of free memory. */
-			regions[regions_size].memory_minimum = entry->base;
-			/* The value memory_size represents the exact amount of free memory in bytes. */
-			regions[regions_size].memory_size = entry->length;
-			/* The value memory_maximum represents the end of the region of free memory. */
-			regions[regions_size].memory_maximum = regions[regions_size].memory_minimum + entry->length;
-			/* Stores where pages (all of them are next to each other) start in memory. */
-			regions[regions_size].pages_minumum = regions[regions_size].memory_minimum;
-			/* Stores the size in pages. */
-			regions[regions_size].pages_size = regions[regions_size].memory_size / PAGE_SIZE;
-			/* Stores the end of the pages in memory. */
-			regions[regions_size].pages_maximum = (regions[regions_size].pages_size * PAGE_SIZE) + regions[regions_size].pages_minumum;
+			case LIMINE_MEMMAP_USABLE:
+				usable_pages += (entry->length + (PAGE_SIZE - 1)) / PAGE_SIZE;
+				highest_address = highest_address > (entry->base + entry->length) ? highest_address : (entry->base + entry->length);
+				break;
+			case LIMINE_MEMMAP_RESERVED:
+			case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
+			case LIMINE_MEMMAP_ACPI_NVS:
+			case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
+			case LIMINE_MEMMAP_KERNEL_AND_MODULES:
+				reserved_pages += (entry->length + (PAGE_SIZE - 1)) / PAGE_SIZE;
+				break;
+		}
+	}
 
-			/* Stores the amount of bits needed to store the allocation status of all pages in the region. */
-			regions[regions_size].status_bits_size = regions[regions_size].pages_size;
+	highest_page_index = highest_address / PAGE_SIZE;
+	uint64_t bitmap_size = ((highest_page_index / 8) + (PAGE_SIZE - 1)) / PAGE_SIZE * PAGE_SIZE;
 
-			/* Stores the amount of bytes needed to store the allocation status of all pages in the region. */
-			regions[regions_size].status_bytes_size = regions[regions_size].status_bits_size / 8;
+	for(size_t i = 0; i < memmap->entry_count; i++)
+	{
+		struct limine_memmap_entry *entry = entries[i];
 
-			/*
-			 *	Stores the amount of pages needed to store the allocation status of all pages in the region.
-			 *	It may require some optimization, see the comment below this one.
-			 */
-			regions[regions_size].status_pages_size = physmem_byte2page(regions[regions_size].status_bytes_size);
+		if(entry->type != LIMINE_MEMMAP_USABLE)
+		{
+			continue;
+		}
 
-			stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "Here are the bounds of entry " BOLD_WHITE "%lu" RESET " of usable memory (min=" BOLD_WHITE "0x%lx" RESET ", max=" BOLD_WHITE "0x%lx" RESET ", size=" BOLD_WHITE "0x%lx" RESET ")!\r\n", regions_size + 1, regions[regions_size].memory_minimum, regions[regions_size].memory_maximum, regions[regions_size].memory_size);
+		if(entry->length >= bitmap_size)
+		{
+			bitmap = (uint8_t *)(entry->base + hhdm->offset);
 
-			regions_size++;
+			memset(bitmap, 0xFF, bitmap_size);
+
+			entry->length -= bitmap_size;
+			entry->base += bitmap_size;
+
 			break;
 		}
 	}
 
-	uint64_t installed_memory = 0;
-	for(uint64_t i = 0; i < regions_size; i++)
+	for(size_t i = 0; i < memmap->entry_count; i++)
 	{
-		installed_memory += regions[i].memory_size;
+		struct limine_memmap_entry *entry = entries[i];
+
+		if(entry->type != LIMINE_MEMMAP_USABLE)
+		{
+			continue;
+		}
+
+		for(uint64_t j = 0; j < entry->length; j += PAGE_SIZE)
+		{
+			bitmap_clear(bitmap, (entry->base + j) / PAGE_SIZE);
+		}
 	}
 
-	stream_printf(current_stream, "[" BOLD_RED "MEMORY" RESET "]:" ALIGN "In total, there are " BOLD_WHITE "%lu" RESET " bytes of usable memory.\r\n", installed_memory);
+	terminal_printf(current_terminal, "[" BOLD_RED "PHYSMEM" RESET "]:" ALIGN "Detected available memory (size=" BOLD_WHITE "%luMiB" RESET ")!\r\n", (usable_pages * 4096) / 1024 / 1024);
 
 	return 0;
 }
 
-/* Display the bitmap of a specific region by the region's index. */
-void physmem_printbitmap(uint64_t index)
+static void *inner_allocate(uint64_t pages, uint64_t limit)
 {
-	for(uint64_t i = 0; i < regions[index].status_bits_size; i++)
-	{
-		if (physmem_getstatus(index, i) == true)
-		{
-			stream_printf(current_stream, "\x1b[36m1");
-		}
-		else if (physmem_getstatus(index, i) == false)
-		{
-			stream_printf(current_stream, "\x1b[35m0");
-		}
-	}
-	stream_printf(current_stream, "\x1b[0m\r\n");
-}
+	uint64_t p = 0;
 
-/* Display the bitmap of all regions. */
-void physmem_printbitmaps()
-{
-	for(uint64_t i = 0; i < regions_size; i++)
+	while(last_used_index < limit)
 	{
-		for(uint64_t j = 0; j < regions[i].status_bits_size; j++)
+		if(!bitmap_get(bitmap, last_used_index++))
 		{
-			if (physmem_getstatus(i, j) == true)
+			if(++p == pages)
 			{
-				stream_printf(current_stream, "\x1b[36m1");
-			}
-			else if (physmem_getstatus(i, j) == false)
-			{
-				stream_printf(current_stream, "\x1b[35m0");
+				uint64_t page = last_used_index - pages;
+				for(uint64_t i = page; i < last_used_index; i++)
+				{
+					bitmap_set(bitmap, i);
+				}
+				return (void *)(page * PAGE_SIZE);
 			}
 		}
-	}
-	stream_printf(current_stream, "\x1b[0m\r\n");
-}
-
-void physmem_drawbitmaps()
-{
-	volatile uint32_t *framebuffer = framebuffer_request.response->framebuffers[0]->address;
-	uint64_t k = 0;
-
-	for (uint64_t i = 0; i < regions_size; i++)
-	{
-		for (uint64_t j = 0; j < regions[i].status_bits_size; j++)
+		else
 		{
-			if (physmem_getstatus(i, j) == true)
-			{
-				framebuffer[k] = RGB(255, 0, 0);
-			}
-			else
-			{
-				framebuffer[k] = RGB(0, 255, 0);
-			}
-
-			k++;
-		}
-	}
-}
-
-/*
- *	Print all of the addresses of all existing pages in a region, regardless
- *	of whether they are allocated or not.
- */
-void physmem_printpages(uint64_t index)
-{
-	for (uint64_t i = 0; i < regions[index].pages_size; i++)
-	{
-		stream_printf(current_stream, "0x%lx ", physmem_index2address(index, i));
-	}
-	stream_printf(current_stream, "\r\n");
-}
-
-/* Find a free page, and return it's index. */
-uint64_t physmem_find_free(uint64_t index)
-{
-	for(uint64_t i = regions[index].status_pages_size; i < regions[index].status_bits_size; i++)
-	{
-		if(physmem_getstatus(index, i) == false)
-		{
-			return i;
+			p = 0;
 		}
 	}
 
-	return 0xFFFFFFFFFFFFFFFF;
+	return NULL;
 }
 
-/* Allocate a 4KiB page. */
-int physmem_allocate(uint64_t * address)
+void *physmem_allocate(uint64_t pages)
 {
-	for(uint64_t i = 0; i < regions_size; i++)
+	uint64_t last = last_used_index;
+	void *return_value = inner_allocate(pages, highest_page_index);
+
+	if(return_value == NULL)
 	{
-		uint64_t j = physmem_find_free(i);
-		if(j != 0xFFFFFFFFFFFFFFFF)
-		{
-			uint64_t k = physmem_index2address(i, j);
-			physmem_mark_allocated(i, j);
-			*address = k;
-			return 0;
-		}
+		last_used_index = 0;
+		return_value = inner_allocate(pages, last);
 	}
 
-	return -1;
+	used_pages += pages;
+
+	return return_value;
 }
 
-/* Free a 4KiB page. */
-int physmem_free(uint64_t address)
+void physmem_deallocate(void *address, uint64_t pages)
 {
-	uint64_t index0 = physmem_getregion(address);
-	uint64_t index1 = physmem_address2index(index0, address);
+	uint64_t page = (uint64_t)address / PAGE_SIZE;
 
-	if(index0 == 0xFFFFFFFFFFFFFFFF)
+	for(uint64_t i = page; i < page + pages; i++)
 	{
-		return -1;
+		bitmap_clear(bitmap, i);
 	}
 
-	physmem_mark_free(index0, index1);
-
-	return 0;
+	used_pages -= pages;
 }

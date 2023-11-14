@@ -4,13 +4,14 @@
 #include "thirdparty/limine.h"
 #include "arch/amd64-pc/cpu.h"
 #include "arch/amd64-pc/gdt.h"
+#include "arch/amd64-pc/acpi.h"
 #include "serial.h"
-#include "stream.h"
+#include "terminal.h"
 #include "interrupt.h"
 #include "ansi.h"
 #include "physmem.h"
-#include "virtmem.h"
 #include "range.h"
+#include "heap.h"
 
 void _start()
 {
@@ -18,20 +19,23 @@ void _start()
 	if(gdt_init() != 0) { hang(); }
 
 	/*
-	 *	Initializing the stream module (stream.c & stream.h) allows us to communicate through
+	 *	Initializing the terminal module (terminal.c & terminal.h) allows us to communicate through
 	 *	terminals, such as the framebuffer terminal, which sits on the first screen, and allows
 	 *	us to communicate through serial ports COM1, COM2, COM3, COM4, COM5, COM6, COM7 and COM8.
 	 */
-	if(stream_init() != 0) { hang(); }
+	if(terminal_init() != 0) { hang(); }
 
 	/* Set up the page frame allocator! */
 	if(physmem_init() != 0) { hang(); }
 
+	/* Set up the kernel heap! */
+	if(heap_init() != 0) { hang(); }
+
 	/* Calculate bounds in memory. */
 	if(range_init() != 0) { hang(); }
 
-	/* Set up the virtual memory manager! */
-	if(virtmem_init() != 0) { hang(); }
+	/* Set up ACPI devices. */
+	if(acpi_init() != 0) { hang(); }
 
 	/* Tell the CPU where our new IDT (Interrupt Descriptor Table) is at... */
 	interrupt_flush();
@@ -58,26 +62,7 @@ void _start()
 	 *	Printing `Hello, world!` allows us to see if the initialization of all other modules above
 	 *	succeeded or not.
 	 */
-	stream_printf(current_stream, "Hello, world!\r\n");
-
-	uint64_t pointer0;
-	physmem_allocate(&pointer0);
-	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", pointer0);
-
-	uint64_t pointer1;
-	physmem_allocate(&pointer1);
-	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", pointer1);
-
-	uint64_t pointer2;
-	physmem_allocate(&pointer2);
-	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", pointer2);
-
-	physmem_free(pointer0);
-
-	stream_printf(current_stream, "Freed the first allocated page!\r\n");
-
-	physmem_allocate(&pointer0);
-	stream_printf(current_stream, "Allocated a page (address=" BOLD_WHITE "0x%lx" RESET ")!\r\n", pointer0);
+	terminal_printf(current_terminal, "Hello, world!\r\n");
 
 	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
 	hang();
