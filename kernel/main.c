@@ -26,43 +26,44 @@ void _start()
 	if(terminal_init() != 0) { hang(); }
 
 	/* Set up the page frame allocator! */
-	if(physmem_init() != 0) { hang(); }
+	//if(physmem_init() != 0) { hang(); }
 
 	/* Set up the kernel heap! */
-	if(heap_init() != 0) { hang(); }
+	//if(heap_init() != 0) { hang(); }
 
 	/* Calculate bounds in memory. */
-	if(range_init() != 0) { hang(); }
+	//if(range_init() != 0) { hang(); }
 
 	/* Set up ACPI devices. */
-	if(acpi_init() != 0) { hang(); }
+	//if(acpi_init() != 0) { hang(); }
 
 	/* Tell the CPU where our new IDT (Interrupt Descriptor Table) is at... */
-	interrupt_flush();
+	//interrupt_flush();
 
 	/* Add exception handler entries to the IDT! */
-	interrupt_register(0, &interrupt0, 0x8E);
-	interrupt_register(2, &interrupt2, 0x8E);
-	interrupt_register(4, &interrupt4, 0x8E);
-	interrupt_register(5, &interrupt5, 0x8E);
-	interrupt_register(6, &interrupt6, 0x8E);
-	interrupt_register(7, &interrupt7, 0x8E);
-	interrupt_register(8, &interrupt8, 0x8E);
-	interrupt_register(10, &interrupt10, 0x8E);
-	interrupt_register(11, &interrupt11, 0x8E);
-	interrupt_register(12, &interrupt12, 0x8E);
-	interrupt_register(13, &interrupt13, 0x8E);
-	interrupt_register(14, &interrupt14, 0x8E);
-	interrupt_register(15, &interrupt15, 0x8E);
-	interrupt_register(16, &interrupt16, 0x8E);
-	interrupt_register(18, &interrupt18, 0x8E);
-	interrupt_register(21, &interrupt21, 0x8E);
+	//interrupt_register(0, &interrupt0, 0x8E);
+	//interrupt_register(2, &interrupt2, 0x8E);
+	//interrupt_register(4, &interrupt4, 0x8E);
+	//interrupt_register(5, &interrupt5, 0x8E);
+	//interrupt_register(6, &interrupt6, 0x8E);
+	//interrupt_register(7, &interrupt7, 0x8E);
+	//interrupt_register(8, &interrupt8, 0x8E);
+	//interrupt_register(10, &interrupt10, 0x8E);
+	//interrupt_register(11, &interrupt11, 0x8E);
+	//interrupt_register(12, &interrupt12, 0x8E);
+	//interrupt_register(13, &interrupt13, 0x8E);
+	//interrupt_register(14, &interrupt14, 0x8E);
+	//interrupt_register(15, &interrupt15, 0x8E);
+	//interrupt_register(16, &interrupt16, 0x8E);
+	//interrupt_register(18, &interrupt18, 0x8E);
+	//interrupt_register(21, &interrupt21, 0x8E);
 
 	/*
 	 *	Printing `Hello, world!` allows us to see if the initialization of all other modules above
 	 *	succeeded or not.
 	 */
-	terminal_printf(current_terminal, "Hello, world!\r\n");
+	terminal_putc(current_terminal, 'a');
+	//terminal_printf(current_terminal, "Hello, world!\r\n");
 
 	/* Let's hang the CPU here, causing it to disable interrupts & halt in a loop. */
 	hang();
